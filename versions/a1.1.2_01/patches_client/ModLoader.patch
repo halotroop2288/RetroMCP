@@ -1,0 +1,2212 @@
+Index: minecraft/net/minecraft/src/BaseMod.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/BaseMod.java b/minecraft/net/minecraft/src/BaseMod.java
+new file mode 100644
+--- /dev/null	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
++++ b/minecraft/net/minecraft/src/BaseMod.java	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
+@@ -0,0 +1,26 @@
++package net.minecraft.src;
++
++import java.util.List;
++import java.util.Map;
++
++public abstract class BaseMod {
++	public void AddRecipes(CraftingManager recipes) {
++	}
++
++	public void RegisterBlocks(List<Block> registry) {
++	}
++
++	public void AddRenderer(Map<Class<? extends Entity>, Render> renderers) {
++	}
++
++	public void AddEntityID() {
++	}
++
++	public int AddSmelting(int id) {
++		return -1;
++	}
++
++	public int AddFuel(int id) {
++		return 0;
++	}
++}
+Index: minecraft/net/minecraft/src/Block.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/Block.java b/minecraft/net/minecraft/src/Block.java
+--- a/minecraft/net/minecraft/src/Block.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/Block.java	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
+@@ -120,359 +120,6 @@
+ 	public final Material material;
+ 	public float slipperiness;
+ 
+-	protected Block(int var1, Material var2) {
+-		this.stepSound = soundPowderFootstep;
+-		this.blockParticleGravity = 1.0F;
+-		this.slipperiness = 0.6F;
+-		if(blocksList[var1] != null) {
+-			throw new IllegalArgumentException("Slot " + var1 + " is already occupied by " + blocksList[var1] + " when adding " + this);
+-		} else {
+-			this.material = var2;
+-			blocksList[var1] = this;
+-			this.blockID = var1;
+-			this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+-			opaqueCubeLookup[var1] = this.isOpaqueCube();
+-			lightOpacity[var1] = this.isOpaqueCube() ? 255 : 0;
+-			canBlockGrass[var1] = this.getCanBlockGrass();
+-			isBlockContainer[var1] = false;
+-		}
+-	}
+-
+-	protected Block(int var1, int var2, Material var3) {
+-		this(var1, var3);
+-		this.blockIndexInTexture = var2;
+-	}
+-
+-	protected Block setStepSound(StepSound var1) {
+-		this.stepSound = var1;
+-		return this;
+-	}
+-
+-	protected Block setLightOpacity(int var1) {
+-		lightOpacity[this.blockID] = var1;
+-		return this;
+-	}
+-
+-	protected Block setLightValue(float var1) {
+-		lightValue[this.blockID] = (int)(15.0F * var1);
+-		return this;
+-	}
+-
+-	protected Block setResistance(float var1) {
+-		this.resistance = var1 * 3.0F;
+-		return this;
+-	}
+-
+-	private boolean getCanBlockGrass() {
+-		return false;
+-	}
+-
+-	public boolean renderAsNormalBlock() {
+-		return true;
+-	}
+-
+-	public int getRenderType() {
+-		return 0;
+-	}
+-
+-	protected Block setHardness(float var1) {
+-		this.hardness = var1;
+-		if(this.resistance < var1 * 5.0F) {
+-			this.resistance = var1 * 5.0F;
+-		}
+-
+-		return this;
+-	}
+-
+-	protected void setTickOnLoad(boolean var1) {
+-		tickOnLoad[this.blockID] = var1;
+-	}
+-
+-	public void setBlockBounds(float var1, float var2, float var3, float var4, float var5, float var6) {
+-		this.minX = (double)var1;
+-		this.minY = (double)var2;
+-		this.minZ = (double)var3;
+-		this.maxX = (double)var4;
+-		this.maxY = (double)var5;
+-		this.maxZ = (double)var6;
+-	}
+-
+-	public float getBlockBrightness(IBlockAccess var1, int var2, int var3, int var4) {
+-		return var1.getBrightness(var2, var3, var4);
+-	}
+-
+-	public boolean shouldSideBeRendered(IBlockAccess var1, int var2, int var3, int var4, int var5) {
+-		return var5 == 0 && this.minY > 0.0D ? true : (var5 == 1 && this.maxY < 1.0D ? true : (var5 == 2 && this.minZ > 0.0D ? true : (var5 == 3 && this.maxZ < 1.0D ? true : (var5 == 4 && this.minX > 0.0D ? true : (var5 == 5 && this.maxX < 1.0D ? true : !var1.isBlockNormalCube(var2, var3, var4))))));
+-	}
+-
+-	public int getBlockTexture(IBlockAccess var1, int var2, int var3, int var4, int var5) {
+-		return this.getBlockTextureFromSideAndMetadata(var5, var1.getBlockMetadata(var2, var3, var4));
+-	}
+-
+-	public int getBlockTextureFromSideAndMetadata(int var1, int var2) {
+-		return this.getBlockTextureFromSide(var1);
+-	}
+-
+-	public int getBlockTextureFromSide(int var1) {
+-		return this.blockIndexInTexture;
+-	}
+-
+-	public AxisAlignedBB getSelectedBoundingBoxFromPool(World var1, int var2, int var3, int var4) {
+-		return AxisAlignedBB.getBoundingBoxFromPool((double)var2 + this.minX, (double)var3 + this.minY, (double)var4 + this.minZ, (double)var2 + this.maxX, (double)var3 + this.maxY, (double)var4 + this.maxZ);
+-	}
+-
+-	public void getCollidingBoundingBoxes(World var1, int var2, int var3, int var4, AxisAlignedBB var5, ArrayList var6) {
+-		AxisAlignedBB var7 = this.getCollisionBoundingBoxFromPool(var1, var2, var3, var4);
+-		if(var7 != null && var5.intersectsWith(var7)) {
+-			var6.add(var7);
+-		}
+-
+-	}
+-
+-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World var1, int var2, int var3, int var4) {
+-		return AxisAlignedBB.getBoundingBoxFromPool((double)var2 + this.minX, (double)var3 + this.minY, (double)var4 + this.minZ, (double)var2 + this.maxX, (double)var3 + this.maxY, (double)var4 + this.maxZ);
+-	}
+-
+-	public boolean isOpaqueCube() {
+-		return true;
+-	}
+-
+-	public boolean canCollideCheck(int var1, boolean var2) {
+-		return this.isCollidable();
+-	}
+-
+-	public boolean isCollidable() {
+-		return true;
+-	}
+-
+-	public void updateTick(World var1, int var2, int var3, int var4, Random var5) {
+-	}
+-
+-	public void randomDisplayTick(World var1, int var2, int var3, int var4, Random var5) {
+-	}
+-
+-	public void onBlockDestroyedByPlayer(World var1, int var2, int var3, int var4, int var5) {
+-	}
+-
+-	public void onNeighborBlockChange(World var1, int var2, int var3, int var4, int var5) {
+-	}
+-
+-	public int tickRate() {
+-		return 10;
+-	}
+-
+-	public void onBlockAdded(World var1, int var2, int var3, int var4) {
+-	}
+-
+-	public void onBlockRemoval(World var1, int var2, int var3, int var4) {
+-	}
+-
+-	public int quantityDropped(Random var1) {
+-		return 1;
+-	}
+-
+-	public int idDropped(int var1, Random var2) {
+-		return this.blockID;
+-	}
+-
+-	public float blockStrength(EntityPlayer var1) {
+-		return this.hardness < 0.0F ? 0.0F : (!var1.canHarvestBlock(this) ? 1.0F / this.hardness / 100.0F : var1.getCurrentPlayerStrVsBlock(this) / this.hardness / 30.0F);
+-	}
+-
+-	public void dropBlockAsItem(World var1, int var2, int var3, int var4, int var5) {
+-		this.dropBlockAsItemWithChance(var1, var2, var3, var4, var5, 1.0F);
+-	}
+-
+-	public void dropBlockAsItemWithChance(World var1, int var2, int var3, int var4, int var5, float var6) {
+-		if(!var1.multiplayerWorld) {
+-			int var7 = this.quantityDropped(var1.rand);
+-
+-			for(int var8 = 0; var8 < var7; ++var8) {
+-				if(var1.rand.nextFloat() <= var6) {
+-					int var9 = this.idDropped(var5, var1.rand);
+-					if(var9 > 0) {
+-						float var10 = 0.7F;
+-						double var11 = (double)(var1.rand.nextFloat() * var10) + (double)(1.0F - var10) * 0.5D;
+-						double var13 = (double)(var1.rand.nextFloat() * var10) + (double)(1.0F - var10) * 0.5D;
+-						double var15 = (double)(var1.rand.nextFloat() * var10) + (double)(1.0F - var10) * 0.5D;
+-						EntityItem var17 = new EntityItem(var1, (double)var2 + var11, (double)var3 + var13, (double)var4 + var15, new ItemStack(var9));
+-						var17.delayBeforeCanPickup = 10;
+-						var1.spawnEntityInWorld(var17);
+-					}
+-				}
+-			}
+-
+-		}
+-	}
+-
+-	public float getExplosionResistance(Entity var1) {
+-		return this.resistance / 5.0F;
+-	}
+-
+-	public MovingObjectPosition collisionRayTrace(World var1, int var2, int var3, int var4, Vec3D var5, Vec3D var6) {
+-		this.setBlockBoundsBasedOnState(var1, var2, var3, var4);
+-		var5 = var5.addVector((double)(-var2), (double)(-var3), (double)(-var4));
+-		var6 = var6.addVector((double)(-var2), (double)(-var3), (double)(-var4));
+-		Vec3D var7 = var5.getIntermediateWithXValue(var6, this.minX);
+-		Vec3D var8 = var5.getIntermediateWithXValue(var6, this.maxX);
+-		Vec3D var9 = var5.getIntermediateWithYValue(var6, this.minY);
+-		Vec3D var10 = var5.getIntermediateWithYValue(var6, this.maxY);
+-		Vec3D var11 = var5.getIntermediateWithZValue(var6, this.minZ);
+-		Vec3D var12 = var5.getIntermediateWithZValue(var6, this.maxZ);
+-		if(!this.isVecInsideYZBounds(var7)) {
+-			var7 = null;
+-		}
+-
+-		if(!this.isVecInsideYZBounds(var8)) {
+-			var8 = null;
+-		}
+-
+-		if(!this.isVecInsideXZBounds(var9)) {
+-			var9 = null;
+-		}
+-
+-		if(!this.isVecInsideXZBounds(var10)) {
+-			var10 = null;
+-		}
+-
+-		if(!this.isVecInsideXYBounds(var11)) {
+-			var11 = null;
+-		}
+-
+-		if(!this.isVecInsideXYBounds(var12)) {
+-			var12 = null;
+-		}
+-
+-		Vec3D var13 = null;
+-		if(var7 != null && (var13 == null || var5.distanceTo(var7) < var5.distanceTo(var13))) {
+-			var13 = var7;
+-		}
+-
+-		if(var8 != null && (var13 == null || var5.distanceTo(var8) < var5.distanceTo(var13))) {
+-			var13 = var8;
+-		}
+-
+-		if(var9 != null && (var13 == null || var5.distanceTo(var9) < var5.distanceTo(var13))) {
+-			var13 = var9;
+-		}
+-
+-		if(var10 != null && (var13 == null || var5.distanceTo(var10) < var5.distanceTo(var13))) {
+-			var13 = var10;
+-		}
+-
+-		if(var11 != null && (var13 == null || var5.distanceTo(var11) < var5.distanceTo(var13))) {
+-			var13 = var11;
+-		}
+-
+-		if(var12 != null && (var13 == null || var5.distanceTo(var12) < var5.distanceTo(var13))) {
+-			var13 = var12;
+-		}
+-
+-		if(var13 == null) {
+-			return null;
+-		} else {
+-			byte var14 = -1;
+-			if(var13 == var7) {
+-				var14 = 4;
+-			}
+-
+-			if(var13 == var8) {
+-				var14 = 5;
+-			}
+-
+-			if(var13 == var9) {
+-				var14 = 0;
+-			}
+-
+-			if(var13 == var10) {
+-				var14 = 1;
+-			}
+-
+-			if(var13 == var11) {
+-				var14 = 2;
+-			}
+-
+-			if(var13 == var12) {
+-				var14 = 3;
+-			}
+-
+-			return new MovingObjectPosition(var2, var3, var4, var14, var13.addVector((double)var2, (double)var3, (double)var4));
+-		}
+-	}
+-
+-	private boolean isVecInsideYZBounds(Vec3D var1) {
+-		return var1 == null ? false : var1.yCoord >= this.minY && var1.yCoord <= this.maxY && var1.zCoord >= this.minZ && var1.zCoord <= this.maxZ;
+-	}
+-
+-	private boolean isVecInsideXZBounds(Vec3D var1) {
+-		return var1 == null ? false : var1.xCoord >= this.minX && var1.xCoord <= this.maxX && var1.zCoord >= this.minZ && var1.zCoord <= this.maxZ;
+-	}
+-
+-	private boolean isVecInsideXYBounds(Vec3D var1) {
+-		return var1 == null ? false : var1.xCoord >= this.minX && var1.xCoord <= this.maxX && var1.yCoord >= this.minY && var1.yCoord <= this.maxY;
+-	}
+-
+-	public void onBlockDestroyedByExplosion(World var1, int var2, int var3, int var4) {
+-	}
+-
+-	public int getRenderBlockPass() {
+-		return 0;
+-	}
+-
+-	public boolean canPlaceBlockAt(World var1, int var2, int var3, int var4) {
+-		int var5 = var1.getBlockId(var2, var3, var4);
+-		return var5 == 0 || blocksList[var5].material.getIsLiquid();
+-	}
+-
+-	public boolean blockActivated(World var1, int var2, int var3, int var4, EntityPlayer var5) {
+-		return false;
+-	}
+-
+-	public void onEntityWalking(World var1, int var2, int var3, int var4, Entity var5) {
+-	}
+-
+-	public void onBlockPlaced(World var1, int var2, int var3, int var4, int var5) {
+-	}
+-
+-	public void onBlockClicked(World var1, int var2, int var3, int var4, EntityPlayer var5) {
+-	}
+-
+-	public void velocityToAddToEntity(World var1, int var2, int var3, int var4, Entity var5, Vec3D var6) {
+-	}
+-
+-	public void setBlockBoundsBasedOnState(IBlockAccess var1, int var2, int var3, int var4) {
+-	}
+-
+-	public int colorMultiplier(IBlockAccess var1, int var2, int var3, int var4) {
+-		return 16777215;
+-	}
+-
+-	public boolean isPoweringTo(IBlockAccess var1, int var2, int var3, int var4, int var5) {
+-		return false;
+-	}
+-
+-	public boolean canProvidePower() {
+-		return false;
+-	}
+-
+-	public void onEntityCollidedWithBlock(World var1, int var2, int var3, int var4, Entity var5) {
+-	}
+-
+-	public boolean isIndirectlyPoweringTo(World var1, int var2, int var3, int var4, int var5) {
+-		return false;
+-	}
+-
+-	public void setBlockBoundsForItemRender() {
+-	}
+-
+-	public void harvestBlock(World var1, int var2, int var3, int var4, int var5) {
+-		this.dropBlockAsItem(var1, var2, var3, var4, var5);
+-	}
+-
+-	public boolean canBlockStay(World var1, int var2, int var3, int var4) {
+-		return true;
+-	}
+-
+ 	static {
+ 		stone = (new BlockStone(1, 1)).setHardness(1.5F).setResistance(10.0F).setStepSound(soundStoneFootstep);
+ 		grass = (BlockGrass)(new BlockGrass(2)).setHardness(0.6F).setStepSound(soundGrassFootstep);
+@@ -524,7 +171,7 @@
+ 		cobblestoneMossy = (new Block(48, 36, Material.rock)).setHardness(2.0F).setResistance(10.0F).setStepSound(soundStoneFootstep);
+ 		obsidian = (new BlockObsidian(49, 37)).setHardness(10.0F).setResistance(2000.0F).setStepSound(soundStoneFootstep);
+ 		torch = (new BlockTorch(50, 80)).setHardness(0.0F).setLightValue(0.9375F).setStepSound(soundWoodFootstep);
+-		fire = (BlockFire)((BlockFire)(new BlockFire(51, 31)).setHardness(0.0F).setLightValue(1.0F).setStepSound(soundWoodFootstep));
++		fire = (BlockFire)(new BlockFire(51, 31)).setHardness(0.0F).setLightValue(1.0F).setStepSound(soundWoodFootstep);
+ 		mobSpawner = (new BlockMobSpawner(52, 65)).setHardness(5.0F).setStepSound(soundMetalFootstep);
+ 		stairCompactWood = new BlockStairs(53, planks);
+ 		chest = (new BlockChest(54)).setHardness(2.5F).setStepSound(soundWoodFootstep);
+@@ -559,12 +206,366 @@
+ 		reed = (new BlockReed(83, 73)).setHardness(0.0F).setStepSound(soundGrassFootstep);
+ 		jukebox = (new BlockJukeBox(84, 74)).setHardness(2.0F).setResistance(10.0F).setStepSound(soundStoneFootstep);
+ 		fence = (new BlockFence(85, 4)).setHardness(2.0F).setResistance(5.0F).setStepSound(soundWoodFootstep);
++		ModLoader.Init();
++
++		for(int i1 = 0; i1 < 256; ++i1) {
++			if(blocksList[i1] != null) {
++				Item.itemsList[i1] = new ItemBlock(i1 - 256);
++			}
++		}
++
++	}
++
++	protected Block(int paramInt, Material paramgb) {
++		this.stepSound = soundPowderFootstep;
++		this.blockParticleGravity = 1.0F;
++		this.slipperiness = 0.6F;
++		if(blocksList[paramInt] != null) {
++			throw new IllegalArgumentException("Slot " + paramInt + " is already occupied by " + blocksList[paramInt] + " when adding " + this);
++		} else {
++			this.material = paramgb;
++			blocksList[paramInt] = this;
++			this.blockID = paramInt;
++			this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
++			opaqueCubeLookup[paramInt] = this.isOpaqueCube();
++			lightOpacity[paramInt] = this.isOpaqueCube() ? 255 : 0;
++			canBlockGrass[paramInt] = this.getCanBlockGrass();
++			isBlockContainer[paramInt] = false;
++		}
++	}
++
++	protected Block(int paramInt1, int paramInt2, Material paramgb) {
++		this(paramInt1, paramgb);
++		this.blockIndexInTexture = paramInt2;
++	}
++
++	protected Block setStepSound(StepSound parambb) {
++		this.stepSound = parambb;
++		return this;
++	}
++
++	protected Block setLightOpacity(int paramInt) {
++		lightOpacity[this.blockID] = paramInt;
++		return this;
++	}
++
++	protected Block setLightValue(float paramFloat) {
++		lightValue[this.blockID] = (int)(15.0F * paramFloat);
++		return this;
++	}
++
++	protected Block setResistance(float paramFloat) {
++		this.resistance = paramFloat * 3.0F;
++		return this;
++	}
++
++	private boolean getCanBlockGrass() {
++		return false;
++	}
++
++	public boolean renderAsNormalBlock() {
++		return true;
++	}
++
++	public int getRenderType() {
++		return 0;
++	}
++
++	protected Block setHardness(float paramFloat) {
++		this.hardness = paramFloat;
++		if(this.resistance < paramFloat * 5.0F) {
++			this.resistance = paramFloat * 5.0F;
++		}
++
++		return this;
++	}
++
++	protected void setTickOnLoad(boolean paramBoolean) {
++		tickOnLoad[this.blockID] = paramBoolean;
++	}
++
++	public void setBlockBounds(float paramFloat1, float paramFloat2, float paramFloat3, float paramFloat4, float paramFloat5, float paramFloat6) {
++		this.minX = (double)paramFloat1;
++		this.minY = (double)paramFloat2;
++		this.minZ = (double)paramFloat3;
++		this.maxX = (double)paramFloat4;
++		this.maxY = (double)paramFloat5;
++		this.maxZ = (double)paramFloat6;
++	}
++
++	public float getBlockBrightness(IBlockAccess paramnm, int paramInt1, int paramInt2, int paramInt3) {
++		return paramnm.getBrightness(paramInt1, paramInt2, paramInt3);
++	}
++
++	public boolean shouldSideBeRendered(IBlockAccess paramnm, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++		return paramInt4 == 0 && this.minY > 0.0D ? true : (paramInt4 == 1 && this.maxY < 1.0D ? true : (paramInt4 == 2 && this.minZ > 0.0D ? true : (paramInt4 == 3 && this.maxZ < 1.0D ? true : (paramInt4 == 4 && this.minX > 0.0D ? true : (paramInt4 == 5 && this.maxX < 1.0D ? true : !paramnm.isBlockNormalCube(paramInt1, paramInt2, paramInt3))))));
++	}
++
++	public int getBlockTexture(IBlockAccess paramnm, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++		return this.getBlockTextureFromSideAndMetadata(paramInt4, paramnm.getBlockMetadata(paramInt1, paramInt2, paramInt3));
++	}
++
++	public int getBlockTextureFromSideAndMetadata(int paramInt1, int paramInt2) {
++		return this.getBlockTextureFromSide(paramInt1);
++	}
++
++	public int getBlockTextureFromSide(int paramInt) {
++		return this.blockIndexInTexture;
++	}
++
++	public AxisAlignedBB getSelectedBoundingBoxFromPool(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++		return AxisAlignedBB.getBoundingBoxFromPool((double)paramInt1 + this.minX, (double)paramInt2 + this.minY, (double)paramInt3 + this.minZ, (double)paramInt1 + this.maxX, (double)paramInt2 + this.maxY, (double)paramInt3 + this.maxZ);
++	}
++
++	public void getCollidingBoundingBoxes(World paramcn, int paramInt1, int paramInt2, int paramInt3, AxisAlignedBB paramcf, ArrayList paramArrayList) {
++		AxisAlignedBB localcf = this.getCollisionBoundingBoxFromPool(paramcn, paramInt1, paramInt2, paramInt3);
++		if(localcf != null && paramcf.intersectsWith(localcf)) {
++			paramArrayList.add(localcf);
++		}
++
++	}
++
++	public AxisAlignedBB getCollisionBoundingBoxFromPool(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++		return AxisAlignedBB.getBoundingBoxFromPool((double)paramInt1 + this.minX, (double)paramInt2 + this.minY, (double)paramInt3 + this.minZ, (double)paramInt1 + this.maxX, (double)paramInt2 + this.maxY, (double)paramInt3 + this.maxZ);
++	}
++
++	public boolean isOpaqueCube() {
++		return true;
++	}
++
++	public boolean canCollideCheck(int paramInt, boolean paramBoolean) {
++		return this.isCollidable();
++	}
++
++	public boolean isCollidable() {
++		return true;
++	}
++
++	public void updateTick(World paramcn, int paramInt1, int paramInt2, int paramInt3, Random paramRandom) {
++	}
++
++	public void randomDisplayTick(World paramcn, int paramInt1, int paramInt2, int paramInt3, Random paramRandom) {
++	}
++
++	public void onBlockDestroyedByPlayer(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++	}
++
++	public void onNeighborBlockChange(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++	}
++
++	public int tickRate() {
++		return 10;
++	}
++
++	public void onBlockAdded(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++	}
++
++	public void onBlockRemoval(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++	}
++
++	public int quantityDropped(Random paramRandom) {
++		return 1;
++	}
++
++	public int idDropped(int paramInt, Random paramRandom) {
++		return this.blockID;
++	}
++
++	public float blockStrength(EntityPlayer paramdm) {
++		return this.hardness < 0.0F ? 0.0F : (!paramdm.canHarvestBlock(this) ? 1.0F / this.hardness / 100.0F : paramdm.getCurrentPlayerStrVsBlock(this) / this.hardness / 30.0F);
++	}
++
++	public void dropBlockAsItem(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++		this.dropBlockAsItemWithChance(paramcn, paramInt1, paramInt2, paramInt3, paramInt4, 1.0F);
++	}
++
++	public void dropBlockAsItemWithChance(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4, float paramFloat) {
++		if(!paramcn.multiplayerWorld) {
++			int i1 = this.quantityDropped(paramcn.rand);
++
++			for(int i2 = 0; i2 < i1; ++i2) {
++				if(paramcn.rand.nextFloat() <= paramFloat) {
++					int i3 = this.idDropped(paramInt4, paramcn.rand);
++					if(i3 > 0) {
++						float f1 = 0.7F;
++						double d1 = (double)(paramcn.rand.nextFloat() * f1) + (double)(1.0F - f1) * 0.5D;
++						double d2 = (double)(paramcn.rand.nextFloat() * f1) + (double)(1.0F - f1) * 0.5D;
++						double d3 = (double)(paramcn.rand.nextFloat() * f1) + (double)(1.0F - f1) * 0.5D;
++						EntityItem localdx = new EntityItem(paramcn, (double)paramInt1 + d1, (double)paramInt2 + d2, (double)paramInt3 + d3, new ItemStack(i3));
++						localdx.delayBeforeCanPickup = 10;
++						paramcn.spawnEntityInWorld(localdx);
++					}
++				}
++			}
++
++		}
++	}
+ 
+-		for(int var0 = 0; var0 < 256; ++var0) {
+-			if(blocksList[var0] != null) {
+-				Item.itemsList[var0] = new ItemBlock(var0 - 256);
+-			}
++	public float getExplosionResistance(Entity paramkh) {
++		return this.resistance / 5.0F;
++	}
++
++	public MovingObjectPosition collisionRayTrace(World paramcn, int paramInt1, int paramInt2, int paramInt3, Vec3D paramaj1, Vec3D paramaj2) {
++		this.canPlaceBlockAt(paramcn, paramInt1, paramInt2, paramInt3);
++		paramaj1 = paramaj1.addVector((double)(-paramInt1), (double)(-paramInt2), (double)(-paramInt3));
++		paramaj2 = paramaj2.addVector((double)(-paramInt1), (double)(-paramInt2), (double)(-paramInt3));
++		Vec3D localaj1 = paramaj1.getIntermediateWithXValue(paramaj2, this.minX);
++		Vec3D localaj2 = paramaj1.getIntermediateWithXValue(paramaj2, this.maxX);
++		Vec3D localaj3 = paramaj1.getIntermediateWithYValue(paramaj2, this.minY);
++		Vec3D localaj4 = paramaj1.getIntermediateWithYValue(paramaj2, this.maxY);
++		Vec3D localaj5 = paramaj1.getIntermediateWithZValue(paramaj2, this.minZ);
++		Vec3D localaj6 = paramaj1.getIntermediateWithZValue(paramaj2, this.maxZ);
++		if(!this.isVecInsideYZBounds(localaj1)) {
++			localaj1 = null;
+ 		}
+ 
++		if(!this.isVecInsideYZBounds(localaj2)) {
++			localaj2 = null;
++		}
++
++		if(!this.isVecInsideXZBounds(localaj3)) {
++			localaj3 = null;
++		}
++
++		if(!this.isVecInsideXZBounds(localaj4)) {
++			localaj4 = null;
++		}
++
++		if(!this.isVecInsideXYBounds(localaj5)) {
++			localaj5 = null;
++		}
++
++		if(!this.isVecInsideXYBounds(localaj6)) {
++			localaj6 = null;
++		}
++
++		Vec3D localaj7 = null;
++		if(localaj1 != null && (localaj7 == null || paramaj1.distanceTo(localaj1) < paramaj1.distanceTo(localaj7))) {
++			localaj7 = localaj1;
++		}
++
++		if(localaj2 != null && (localaj7 == null || paramaj1.distanceTo(localaj2) < paramaj1.distanceTo(localaj7))) {
++			localaj7 = localaj2;
++		}
++
++		if(localaj3 != null && (localaj7 == null || paramaj1.distanceTo(localaj3) < paramaj1.distanceTo(localaj7))) {
++			localaj7 = localaj3;
++		}
++
++		if(localaj4 != null && (localaj7 == null || paramaj1.distanceTo(localaj4) < paramaj1.distanceTo(localaj7))) {
++			localaj7 = localaj4;
++		}
++
++		if(localaj5 != null && (localaj7 == null || paramaj1.distanceTo(localaj5) < paramaj1.distanceTo(localaj7))) {
++			localaj7 = localaj5;
++		}
++
++		if(localaj6 != null && (localaj7 == null || paramaj1.distanceTo(localaj6) < paramaj1.distanceTo(localaj7))) {
++			localaj7 = localaj6;
++		}
++
++		if(localaj7 == null) {
++			return null;
++		} else {
++			byte i1 = -1;
++			if(localaj7 == localaj1) {
++				i1 = 4;
++			}
++
++			if(localaj7 == localaj2) {
++				i1 = 5;
++			}
++
++			if(localaj7 == localaj3) {
++				i1 = 0;
++			}
++
++			if(localaj7 == localaj4) {
++				i1 = 1;
++			}
++
++			if(localaj7 == localaj5) {
++				i1 = 2;
++			}
++
++			if(localaj7 == localaj6) {
++				i1 = 3;
++			}
++
++			return new MovingObjectPosition(paramInt1, paramInt2, paramInt3, i1, localaj7.addVector((double)paramInt1, (double)paramInt2, (double)paramInt3));
++		}
++	}
++
++	private boolean isVecInsideYZBounds(Vec3D paramaj) {
++		return paramaj == null ? false : paramaj.yCoord >= this.minY && paramaj.yCoord <= this.maxY && paramaj.zCoord >= this.minZ && paramaj.zCoord <= this.maxZ;
++	}
++
++	private boolean isVecInsideXZBounds(Vec3D paramaj) {
++		return paramaj == null ? false : paramaj.xCoord >= this.minX && paramaj.xCoord <= this.maxX && paramaj.zCoord >= this.minZ && paramaj.zCoord <= this.maxZ;
++	}
++
++	private boolean isVecInsideXYBounds(Vec3D paramaj) {
++		return paramaj == null ? false : paramaj.xCoord >= this.minX && paramaj.xCoord <= this.maxX && paramaj.yCoord >= this.minY && paramaj.yCoord <= this.maxY;
++	}
++
++	public void onBlockDestroyedByExplosion(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++	}
++
++	public int getRenderBlockPass() {
++		return 0;
++	}
++
++	public boolean canPlaceBlockAt(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++		int i1 = paramcn.getBlockId(paramInt1, paramInt2, paramInt3);
++		return i1 == 0 || blocksList[i1].material.getIsLiquid();
++	}
++
++	public boolean blockActivated(World paramcn, int paramInt1, int paramInt2, int paramInt3, EntityPlayer paramdm) {
++		return false;
++	}
++
++	public void onEntityWalking(World paramcn, int paramInt1, int paramInt2, int paramInt3, Entity paramkh) {
++	}
++
++	public void onBlockPlaced(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++	}
++
++	public void onBlockClicked(World paramcn, int paramInt1, int paramInt2, int paramInt3, EntityPlayer paramdm) {
++	}
++
++	public void velocityToAddToEntity(World paramcn, int paramInt1, int paramInt2, int paramInt3, Entity paramkh, Vec3D paramaj) {
++	}
++
++	public void setBlockBoundsBasedOnState(IBlockAccess paramnm, int paramInt1, int paramInt2, int paramInt3) {
++	}
++
++	public int colorMultiplier(IBlockAccess paramnm, int paramInt1, int paramInt2, int paramInt3) {
++		return 16777215;
++	}
++
++	public boolean isPoweringTo(IBlockAccess paramnm, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++		return false;
++	}
++
++	public boolean canProvidePower() {
++		return false;
++	}
++
++	public void onEntityCollidedWithBlock(World paramcn, int paramInt1, int paramInt2, int paramInt3, Entity paramkh) {
++	}
++
++	public boolean isIndirectlyPoweringTo(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++		return false;
++	}
++
++	public void setBlockBoundsForItemRender() {
++	}
++
++	public void harvestBlock(World paramcn, int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
++		this.dropBlockAsItem(paramcn, paramInt1, paramInt2, paramInt3, paramInt4);
++	}
++
++	public boolean canBlockStay(World paramcn, int paramInt1, int paramInt2, int paramInt3) {
++		return true;
+ 	}
+ }
+Index: minecraft/net/minecraft/src/BlockMinecartTrack.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/BlockMinecartTrack.java b/minecraft/net/minecraft/src/BlockMinecartTrack.java
+new file mode 100644
+--- /dev/null	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
++++ b/minecraft/net/minecraft/src/BlockMinecartTrack.java	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
+@@ -0,0 +1,94 @@
++package net.minecraft.src;
++
++import java.util.Random;
++
++public class BlockMinecartTrack extends Block {
++	protected BlockMinecartTrack(int i, int j) {
++		super(i, j, Material.circuits);
++		this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
++	}
++
++	public AxisAlignedBB getCollisionBoundingBoxFromPool(World cn1, int i, int j, int k) {
++		return null;
++	}
++
++	public boolean isOpaqueCube() {
++		return false;
++	}
++
++	public MovingObjectPosition collisionRayTrace(World cn1, int i, int j, int k, Vec3D aj, Vec3D aj1) {
++		this.setBlockBoundsBasedOnState(cn1, i, j, k);
++		return super.collisionRayTrace(cn1, i, j, k, aj, aj1);
++	}
++
++	public void setBlockBoundsBasedOnState(IBlockAccess nm1, int i, int j, int k) {
++		int l = nm1.getBlockMetadata(i, j, k);
++		if(l >= 2 && l <= 5) {
++			this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
++		} else {
++			this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
++		}
++
++	}
++
++	public int getBlockTextureFromSideAndMetadata(int i, int j) {
++		return j >= 6 ? this.blockIndexInTexture - 16 : this.blockIndexInTexture;
++	}
++
++	public boolean renderAsNormalBlock() {
++		return false;
++	}
++
++	public int getRenderType() {
++		return 9;
++	}
++
++	public int quantityDropped(Random random) {
++		return 1;
++	}
++
++	public boolean canPlaceBlockAt(World cn1, int i, int j, int k) {
++		return cn1.isBlockNormalCube(i, j - 1, k);
++	}
++
++	public void onBlockAdded(World cn1, int i, int j, int k) {
++		cn1.setBlockMetadataWithNotify(i, j, k, 15);
++		this.h(cn1, i, j, k);
++	}
++
++	public void onNeighborBlockChange(World cn1, int i, int j, int k, int l) {
++		int i1 = cn1.getBlockMetadata(i, j, k);
++		boolean flag = false;
++		if(!cn1.isBlockNormalCube(i, j - 1, k)) {
++			flag = true;
++		}
++
++		if(i1 == 2 && !cn1.isBlockNormalCube(i + 1, j, k)) {
++			flag = true;
++		}
++
++		if(i1 == 3 && !cn1.isBlockNormalCube(i - 1, j, k)) {
++			flag = true;
++		}
++
++		if(i1 == 4 && !cn1.isBlockNormalCube(i, j, k - 1)) {
++			flag = true;
++		}
++
++		if(i1 == 5 && !cn1.isBlockNormalCube(i, j, k + 1)) {
++			flag = true;
++		}
++
++		if(flag) {
++			this.dropBlockAsItem(cn1, i, j, k, cn1.getBlockMetadata(i, j, k));
++			cn1.setBlockWithNotify(i, j, k, 0);
++		} else if(l > 0 && Block.blocksList[l].canProvidePower() && MinecartTrackLogic.getNAdjacentTracks(new MinecartTrackLogic(this, cn1, i, j, k)) == 3) {
++			this.h(cn1, i, j, k);
++		}
++
++	}
++
++	private void h(World cn1, int i, int j, int k) {
++		(new MinecartTrackLogic(this, cn1, i, j, k)).place(cn1.isBlockIndirectlyGettingPowered(i, j, k));
++	}
++}
+Index: minecraft/net/minecraft/src/BlockMinecartTrack.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/BlockMinecartTrack.java b/minecraft/net/minecraft/src/BlockMinecartTrack.java
+deleted file mode 100644
+--- a/minecraft/net/minecraft/src/BlockMinecartTrack.java	(revision b0513cc64ea2547df84414ab2308af2f8af8b6e1)
++++ /dev/null	(revision b0513cc64ea2547df84414ab2308af2f8af8b6e1)
+@@ -1,94 +0,0 @@
+-package net.minecraft.src;
+-
+-import java.util.Random;
+-
+-public class BlockMinecartTrack extends Block {
+-	protected BlockMinecartTrack(int var1, int var2) {
+-		super(var1, var2, Material.circuits);
+-		this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
+-	}
+-
+-	public AxisAlignedBB getCollisionBoundingBoxFromPool(World var1, int var2, int var3, int var4) {
+-		return null;
+-	}
+-
+-	public boolean isOpaqueCube() {
+-		return false;
+-	}
+-
+-	public MovingObjectPosition collisionRayTrace(World var1, int var2, int var3, int var4, Vec3D var5, Vec3D var6) {
+-		this.setBlockBoundsBasedOnState(var1, var2, var3, var4);
+-		return super.collisionRayTrace(var1, var2, var3, var4, var5, var6);
+-	}
+-
+-	public void setBlockBoundsBasedOnState(IBlockAccess var1, int var2, int var3, int var4) {
+-		int var5 = var1.getBlockMetadata(var2, var3, var4);
+-		if(var5 >= 2 && var5 <= 5) {
+-			this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.625F, 1.0F);
+-		} else {
+-			this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
+-		}
+-
+-	}
+-
+-	public int getBlockTextureFromSideAndMetadata(int var1, int var2) {
+-		return var2 >= 6 ? this.blockIndexInTexture - 16 : this.blockIndexInTexture;
+-	}
+-
+-	public boolean renderAsNormalBlock() {
+-		return false;
+-	}
+-
+-	public int getRenderType() {
+-		return 9;
+-	}
+-
+-	public int quantityDropped(Random var1) {
+-		return 1;
+-	}
+-
+-	public boolean canPlaceBlockAt(World var1, int var2, int var3, int var4) {
+-		return var1.isBlockNormalCube(var2, var3 - 1, var4);
+-	}
+-
+-	public void onBlockAdded(World var1, int var2, int var3, int var4) {
+-		var1.setBlockMetadataWithNotify(var2, var3, var4, 15);
+-		this.refreshTrackShape(var1, var2, var3, var4);
+-	}
+-
+-	public void onNeighborBlockChange(World var1, int var2, int var3, int var4, int var5) {
+-		int var6 = var1.getBlockMetadata(var2, var3, var4);
+-		boolean var7 = false;
+-		if(!var1.isBlockNormalCube(var2, var3 - 1, var4)) {
+-			var7 = true;
+-		}
+-
+-		if(var6 == 2 && !var1.isBlockNormalCube(var2 + 1, var3, var4)) {
+-			var7 = true;
+-		}
+-
+-		if(var6 == 3 && !var1.isBlockNormalCube(var2 - 1, var3, var4)) {
+-			var7 = true;
+-		}
+-
+-		if(var6 == 4 && !var1.isBlockNormalCube(var2, var3, var4 - 1)) {
+-			var7 = true;
+-		}
+-
+-		if(var6 == 5 && !var1.isBlockNormalCube(var2, var3, var4 + 1)) {
+-			var7 = true;
+-		}
+-
+-		if(var7) {
+-			this.dropBlockAsItem(var1, var2, var3, var4, var1.getBlockMetadata(var2, var3, var4));
+-			var1.setBlockWithNotify(var2, var3, var4, 0);
+-		} else if(var5 > 0 && Block.blocksList[var5].canProvidePower() && MinecartTrackLogic.getNAdjacentTracks(new MinecartTrackLogic(this, var1, var2, var3, var4)) == 3) {
+-			this.refreshTrackShape(var1, var2, var3, var4);
+-		}
+-
+-	}
+-
+-	private void refreshTrackShape(World var1, int var2, int var3, int var4) {
+-		(new MinecartTrackLogic(this, var1, var2, var3, var4)).place(var1.isBlockIndirectlyGettingPowered(var2, var3, var4));
+-	}
+-}
+Index: minecraft/net/minecraft/src/CraftingManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/CraftingManager.java b/minecraft/net/minecraft/src/CraftingManager.java
+--- a/minecraft/net/minecraft/src/CraftingManager.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/CraftingManager.java	(revision 404c49ebad9f37cdf25969758b92f5b49d63a119)
+@@ -7,7 +7,7 @@
+ 
+ public class CraftingManager {
+ 	private static final CraftingManager instance = new CraftingManager();
+-	private List recipes = new ArrayList();
++	public List recipes = new ArrayList();
+ 
+ 	public static final CraftingManager getInstance() {
+ 		return instance;
+@@ -20,6 +20,7 @@
+ 		(new RecipesFood()).addRecipes(this);
+ 		(new RecipesCrafting()).addRecipes(this);
+ 		(new RecipesArmor()).addRecipes(this);
++		ModLoader.AddAllRecipes(this);
+ 		this.addRecipe(new ItemStack(Item.paper, 3), new Object[]{"###", Character.valueOf('#'), Item.reed});
+ 		this.addRecipe(new ItemStack(Item.book, 1), new Object[]{"#", "#", "#", Character.valueOf('#'), Item.paper});
+ 		this.addRecipe(new ItemStack(Block.fence, 2), new Object[]{"###", "###", Character.valueOf('#'), Item.stick});
+@@ -28,10 +29,9 @@
+ 		this.addRecipe(new ItemStack(Block.blockSnow, 1), new Object[]{"##", "##", Character.valueOf('#'), Item.snowball});
+ 		this.addRecipe(new ItemStack(Block.blockClay, 1), new Object[]{"##", "##", Character.valueOf('#'), Item.clay});
+ 		this.addRecipe(new ItemStack(Block.brick, 1), new Object[]{"##", "##", Character.valueOf('#'), Item.brick});
+-		this.addRecipe(new ItemStack(Block.cloth, 1), new Object[]{"###", "###", "###", Character.valueOf('#'), Item.silk});
+ 		this.addRecipe(new ItemStack(Block.tnt, 1), new Object[]{"X#X", "#X#", "X#X", Character.valueOf('X'), Item.gunpowder, Character.valueOf('#'), Block.sand});
+ 		this.addRecipe(new ItemStack(Block.stairSingle, 3), new Object[]{"###", Character.valueOf('#'), Block.cobblestone});
+-		this.addRecipe(new ItemStack(Block.ladder, 1), new Object[]{"# #", "###", "# #", Character.valueOf('#'), Item.stick});
++		this.addRecipe(new ItemStack(Block.ladder, 4), new Object[]{"# #", "###", "# #", Character.valueOf('#'), Item.stick});
+ 		this.addRecipe(new ItemStack(Item.doorWood, 1), new Object[]{"##", "##", "##", Character.valueOf('#'), Block.planks});
+ 		this.addRecipe(new ItemStack(Item.doorSteel, 1), new Object[]{"##", "##", "##", Character.valueOf('#'), Item.ingotIron});
+ 		this.addRecipe(new ItemStack(Item.sign, 1), new Object[]{"###", "###", " X ", Character.valueOf('#'), Block.planks, Character.valueOf('X'), Item.stick});
+@@ -62,62 +62,62 @@
+ 		System.out.println(this.recipes.size() + " recipes");
+ 	}
+ 
+-	void addRecipe(ItemStack var1, Object... var2) {
+-		String var3 = "";
+-		int var4 = 0;
+-		int var5 = 0;
+-		int var6 = 0;
+-		if(var2[var4] instanceof String[]) {
+-			String[] var11 = (String[])((String[])var2[var4++]);
++	void addRecipe(ItemStack paramev, Object[] paramArrayOfObject) {
++		String str1 = "";
++		int i = 0;
++		int j = 0;
++		int k = 0;
++		if(paramArrayOfObject[i] instanceof String[]) {
++			String[] var11 = (String[])paramArrayOfObject[i++];
+ 
+-			for(int var8 = 0; var8 < var11.length; ++var8) {
+-				String var9 = var11[var8];
+-				++var6;
+-				var5 = var9.length();
+-				var3 = var3 + var9;
++			for(int localObject2 = 0; localObject2 < var11.length; ++localObject2) {
++				String n = var11[localObject2];
++				++k;
++				j = n.length();
++				str1 = str1 + n;
+ 			}
+ 		} else {
+-			while(var2[var4] instanceof String) {
+-				String var7 = (String)var2[var4++];
+-				++var6;
+-				var5 = var7.length();
+-				var3 = var3 + var7;
++			while(paramArrayOfObject[i] instanceof String) {
++				String localObject1 = (String)paramArrayOfObject[i++];
++				++k;
++				j = localObject1.length();
++				str1 = str1 + localObject1;
+ 			}
+ 		}
+ 
+ 		HashMap var12;
+ 		int var15;
+-		for(var12 = new HashMap(); var4 < var2.length; var4 += 2) {
+-			Character var13 = (Character)var2[var4];
++		for(var12 = new HashMap(); i < paramArrayOfObject.length; i += 2) {
++			Character var13 = (Character)paramArrayOfObject[i];
+ 			var15 = 0;
+-			if(var2[var4 + 1] instanceof Item) {
+-				var15 = ((Item)var2[var4 + 1]).shiftedIndex;
+-			} else if(var2[var4 + 1] instanceof Block) {
+-				var15 = ((Block)var2[var4 + 1]).blockID;
++			if(paramArrayOfObject[i + 1] instanceof Item) {
++				var15 = ((Item)paramArrayOfObject[i + 1]).shiftedIndex;
++			} else if(paramArrayOfObject[i + 1] instanceof Block) {
++				var15 = ((Block)paramArrayOfObject[i + 1]).blockID;
+ 			}
+ 
+ 			var12.put(var13, Integer.valueOf(var15));
+ 		}
+ 
+-		int[] var14 = new int[var5 * var6];
++		int[] var14 = new int[j * k];
+ 
+-		for(var15 = 0; var15 < var5 * var6; ++var15) {
+-			char var10 = var3.charAt(var15);
+-			if(var12.containsKey(Character.valueOf(var10))) {
+-				var14[var15] = ((Integer)var12.get(Character.valueOf(var10))).intValue();
++		for(var15 = 0; var15 < j * k; ++var15) {
++			char c = str1.charAt(var15);
++			if(var12.containsKey(Character.valueOf(c))) {
++				var14[var15] = ((Integer)var12.get(Character.valueOf(c))).intValue();
+ 			} else {
+ 				var14[var15] = -1;
+ 			}
+ 		}
+ 
+-		this.recipes.add(new CraftingRecipe(var5, var6, var14, var1));
++		this.recipes.add(new CraftingRecipe(j, k, var14, paramev));
+ 	}
+ 
+-	public ItemStack findMatchingRecipe(int[] var1) {
+-		for(int var2 = 0; var2 < this.recipes.size(); ++var2) {
+-			CraftingRecipe var3 = (CraftingRecipe)this.recipes.get(var2);
+-			if(var3.matches(var1)) {
+-				return var3.getCraftingResult(var1);
++	public ItemStack findMatchingRecipe(int[] paramArrayOfInt) {
++		for(int i = 0; i < this.recipes.size(); ++i) {
++			CraftingRecipe localbv = (CraftingRecipe)this.recipes.get(i);
++			if(localbv.matches(paramArrayOfInt)) {
++				return localbv.getCraftingResult(paramArrayOfInt);
+ 			}
+ 		}
+ 
+Index: minecraft/net/minecraft/src/EntityList.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/EntityList.java b/minecraft/net/minecraft/src/EntityList.java
+--- a/minecraft/net/minecraft/src/EntityList.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/EntityList.java	(revision 404c49ebad9f37cdf25969758b92f5b49d63a119)
+@@ -9,76 +9,6 @@
+ 	private static Map IDtoClassMapping = new HashMap();
+ 	private static Map classToIDMapping = new HashMap();
+ 
+-	private static void addMapping(Class var0, String var1, int var2) {
+-		stringToClassMapping.put(var1, var0);
+-		classToStringMapping.put(var0, var1);
+-		IDtoClassMapping.put(Integer.valueOf(var2), var0);
+-		classToIDMapping.put(var0, Integer.valueOf(var2));
+-	}
+-
+-	public static Entity createEntityByName(String var0, World var1) {
+-		Entity var2 = null;
+-
+-		try {
+-			Class var3 = (Class)stringToClassMapping.get(var0);
+-			if(var3 != null) {
+-				var2 = (Entity)var3.getConstructor(new Class[]{World.class}).newInstance(new Object[]{var1});
+-			}
+-		} catch (Exception var4) {
+-			var4.printStackTrace();
+-		}
+-
+-		return var2;
+-	}
+-
+-	public static Entity createEntityFromNBT(NBTTagCompound var0, World var1) {
+-		Entity var2 = null;
+-
+-		try {
+-			Class var3 = (Class)stringToClassMapping.get(var0.getString("id"));
+-			if(var3 != null) {
+-				var2 = (Entity)var3.getConstructor(new Class[]{World.class}).newInstance(new Object[]{var1});
+-			}
+-		} catch (Exception var4) {
+-			var4.printStackTrace();
+-		}
+-
+-		if(var2 != null) {
+-			var2.readFromNBT(var0);
+-		} else {
+-			System.out.println("Skipping Entity with id " + var0.getString("id"));
+-		}
+-
+-		return var2;
+-	}
+-
+-	public static Entity createEntityByID(int var0, World var1) {
+-		Entity var2 = null;
+-
+-		try {
+-			Class var3 = (Class)IDtoClassMapping.get(Integer.valueOf(var0));
+-			if(var3 != null) {
+-				var2 = (Entity)var3.getConstructor(new Class[]{World.class}).newInstance(new Object[]{var1});
+-			}
+-		} catch (Exception var4) {
+-			var4.printStackTrace();
+-		}
+-
+-		if(var2 == null) {
+-			System.out.println("Skipping Entity with id " + var0);
+-		}
+-
+-		return var2;
+-	}
+-
+-	public static int getEntityID(Entity var0) {
+-		return ((Integer)classToIDMapping.get(var0.getClass())).intValue();
+-	}
+-
+-	public static String getEntityString(Entity var0) {
+-		return (String)classToStringMapping.get(var0.getClass());
+-	}
+-
+ 	static {
+ 		addMapping(EntityArrow.class, "Arrow", 10);
+ 		addMapping(EntitySnowball.class, "Snowball", 11);
+@@ -100,5 +30,76 @@
+ 		addMapping(EntityFallingSand.class, "FallingSand", 21);
+ 		addMapping(EntityMinecart.class, "Minecart", 40);
+ 		addMapping(EntityBoat.class, "Boat", 41);
++		ModLoader.AddAllEntityIDs();
++	}
++
++	public static void addMapping(Class paramClass, String paramString, int paramInt) {
++		stringToClassMapping.put(paramString, paramClass);
++		classToStringMapping.put(paramClass, paramString);
++		IDtoClassMapping.put(Integer.valueOf(paramInt), paramClass);
++		classToIDMapping.put(paramClass, Integer.valueOf(paramInt));
++	}
++
++	public static Entity createEntityByName(String paramString, World paramcn) {
++		Entity localkh = null;
++
++		try {
++			Class localException = (Class)stringToClassMapping.get(paramString);
++			if(localException != null) {
++				localkh = (Entity)localException.getConstructor(new Class[]{World.class}).newInstance(new Object[]{paramcn});
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++		return localkh;
++	}
++
++	public static Entity createEntityFromNBT(NBTTagCompound paramhm, World paramcn) {
++		Entity localkh = null;
++
++		try {
++			Class localException = (Class)stringToClassMapping.get(paramhm.getString("id"));
++			if(localException != null) {
++				localkh = (Entity)localException.getConstructor(new Class[]{World.class}).newInstance(new Object[]{paramcn});
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++		if(localkh != null) {
++			localkh.readFromNBT(paramhm);
++		} else {
++			System.out.println("Skipping Entity with id " + paramhm.getString("id"));
++		}
++
++		return localkh;
++	}
++
++	public static Entity createEntityByID(int paramInt, World paramcn) {
++		Entity localkh = null;
++
++		try {
++			Class localException = (Class)IDtoClassMapping.get(Integer.valueOf(paramInt));
++			if(localException != null) {
++				localkh = (Entity)localException.getConstructor(new Class[]{World.class}).newInstance(new Object[]{paramcn});
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++		if(localkh == null) {
++			System.out.println("Skipping Entity with id " + paramInt);
++		}
++
++		return localkh;
++	}
++
++	public static int getEntityID(Entity paramkh) {
++		return ((Integer)classToIDMapping.get(paramkh.getClass())).intValue();
++	}
++
++	public static String getEntityString(Entity paramkh) {
++		return (String)classToStringMapping.get(paramkh.getClass());
+ 	}
+ }
+Index: minecraft/net/minecraft/src/MinecartTrackLogic.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/MinecartTrackLogic.java b/minecraft/net/minecraft/src/MinecartTrackLogic.java
+--- a/minecraft/net/minecraft/src/MinecartTrackLogic.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/MinecartTrackLogic.java	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
+@@ -12,14 +12,14 @@
+ 	private List connectedTracks;
+ 	final BlockMinecartTrack minecartTrack;
+ 
+-	public MinecartTrackLogic(BlockMinecartTrack var1, World var2, int var3, int var4, int var5) {
+-		this.minecartTrack = var1;
++	public MinecartTrackLogic(BlockMinecartTrack if1, World cn1, int i, int j, int k) {
++		this.minecartTrack = if1;
+ 		this.connectedTracks = new ArrayList();
+-		this.worldObj = var2;
+-		this.trackX = var3;
+-		this.trackY = var4;
+-		this.trackZ = var5;
+-		this.trackMetadata = var2.getBlockMetadata(var3, var4, var5);
++		this.worldObj = cn1;
++		this.trackX = i;
++		this.trackY = j;
++		this.trackZ = k;
++		this.trackMetadata = cn1.getBlockMetadata(i, j, k);
+ 		this.calculateConnectedTracks();
+ 	}
+ 
+@@ -60,29 +60,29 @@
+ 	}
+ 
+ 	private void refreshConnectedTracks() {
+-		for(int var1 = 0; var1 < this.connectedTracks.size(); ++var1) {
+-			MinecartTrackLogic var2 = this.getMinecartTrackLogic((ChunkPosition)this.connectedTracks.get(var1));
+-			if(var2 != null && var2.isConnectedTo(this)) {
+-				this.connectedTracks.set(var1, new ChunkPosition(var2.trackX, var2.trackY, var2.trackZ));
++		for(int i = 0; i < this.connectedTracks.size(); ++i) {
++			MinecartTrackLogic mk1 = this.getMinecartTrackLogic((ChunkPosition)this.connectedTracks.get(i));
++			if(mk1 != null && mk1.isConnectedTo(this)) {
++				this.connectedTracks.set(i, new ChunkPosition(mk1.trackX, mk1.trackY, mk1.trackZ));
+ 			} else {
+-				this.connectedTracks.remove(var1--);
++				this.connectedTracks.remove(i--);
+ 			}
+ 		}
+ 
+ 	}
+ 
+-	private boolean isMinecartTrack(int var1, int var2, int var3) {
+-		return this.worldObj.getBlockId(var1, var2, var3) == this.minecartTrack.blockID ? true : (this.worldObj.getBlockId(var1, var2 + 1, var3) == this.minecartTrack.blockID ? true : this.worldObj.getBlockId(var1, var2 - 1, var3) == this.minecartTrack.blockID);
++	private boolean isMinecartTrack(int i, int j, int k) {
++		return this.worldObj.getBlockId(i, j, k) == this.minecartTrack.blockID ? true : (this.worldObj.getBlockId(i, j + 1, k) == this.minecartTrack.blockID ? true : this.worldObj.getBlockId(i, j - 1, k) == this.minecartTrack.blockID);
+ 	}
+ 
+-	private MinecartTrackLogic getMinecartTrackLogic(ChunkPosition var1) {
+-		return this.worldObj.getBlockId(var1.x, var1.y, var1.z) == this.minecartTrack.blockID ? new MinecartTrackLogic(this.minecartTrack, this.worldObj, var1.x, var1.y, var1.z) : (this.worldObj.getBlockId(var1.x, var1.y + 1, var1.z) == this.minecartTrack.blockID ? new MinecartTrackLogic(this.minecartTrack, this.worldObj, var1.x, var1.y + 1, var1.z) : (this.worldObj.getBlockId(var1.x, var1.y - 1, var1.z) == this.minecartTrack.blockID ? new MinecartTrackLogic(this.minecartTrack, this.worldObj, var1.x, var1.y - 1, var1.z) : null));
++	private MinecartTrackLogic getMinecartTrackLogic(ChunkPosition mt1) {
++		return this.worldObj.getBlockId(mt1.x, mt1.y, mt1.z) == this.minecartTrack.blockID ? new MinecartTrackLogic(this.minecartTrack, this.worldObj, mt1.x, mt1.y, mt1.z) : (this.worldObj.getBlockId(mt1.x, mt1.y + 1, mt1.z) == this.minecartTrack.blockID ? new MinecartTrackLogic(this.minecartTrack, this.worldObj, mt1.x, mt1.y + 1, mt1.z) : (this.worldObj.getBlockId(mt1.x, mt1.y - 1, mt1.z) == this.minecartTrack.blockID ? new MinecartTrackLogic(this.minecartTrack, this.worldObj, mt1.x, mt1.y - 1, mt1.z) : null));
+ 	}
+ 
+-	private boolean isConnectedTo(MinecartTrackLogic var1) {
+-		for(int var2 = 0; var2 < this.connectedTracks.size(); ++var2) {
+-			ChunkPosition var3 = (ChunkPosition)this.connectedTracks.get(var2);
+-			if(var3.x == var1.trackX && var3.z == var1.trackZ) {
++	private boolean isConnectedTo(MinecartTrackLogic mk1) {
++		for(int i = 0; i < this.connectedTracks.size(); ++i) {
++			ChunkPosition mt1 = (ChunkPosition)this.connectedTracks.get(i);
++			if(mt1.x == mk1.trackX && mt1.z == mk1.trackZ) {
+ 				return true;
+ 			}
+ 		}
+@@ -90,10 +90,10 @@
+ 		return false;
+ 	}
+ 
+-	private boolean isInTrack(int var1, int var2, int var3) {
+-		for(int var4 = 0; var4 < this.connectedTracks.size(); ++var4) {
+-			ChunkPosition var5 = (ChunkPosition)this.connectedTracks.get(var4);
+-			if(var5.x == var1 && var5.z == var3) {
++	private boolean isInTrack(int i, int j, int k) {
++		for(int l = 0; l < this.connectedTracks.size(); ++l) {
++			ChunkPosition mt1 = (ChunkPosition)this.connectedTracks.get(l);
++			if(mt1.x == i && mt1.z == k) {
+ 				return true;
+ 			}
+ 		}
+@@ -102,222 +102,222 @@
+ 	}
+ 
+ 	private int getAdjacentTracks() {
+-		int var1 = 0;
++		int i = 0;
+ 		if(this.isMinecartTrack(this.trackX, this.trackY, this.trackZ - 1)) {
+-			++var1;
++			++i;
+ 		}
+ 
+ 		if(this.isMinecartTrack(this.trackX, this.trackY, this.trackZ + 1)) {
+-			++var1;
++			++i;
+ 		}
+ 
+ 		if(this.isMinecartTrack(this.trackX - 1, this.trackY, this.trackZ)) {
+-			++var1;
++			++i;
+ 		}
+ 
+ 		if(this.isMinecartTrack(this.trackX + 1, this.trackY, this.trackZ)) {
+-			++var1;
++			++i;
+ 		}
+ 
+-		return var1;
++		return i;
+ 	}
+ 
+-	private boolean canConnectTo(MinecartTrackLogic var1) {
+-		if(this.isConnectedTo(var1)) {
++	private boolean canConnectTo(MinecartTrackLogic mk1) {
++		if(this.isConnectedTo(mk1)) {
+ 			return true;
+ 		} else if(this.connectedTracks.size() == 2) {
+ 			return false;
+ 		} else if(this.connectedTracks.size() == 0) {
+ 			return true;
+ 		} else {
+-			ChunkPosition var2 = (ChunkPosition)this.connectedTracks.get(0);
+-			return var1.trackY == this.trackY && var2.y == this.trackY ? true : true;
++			ChunkPosition mt1 = (ChunkPosition)this.connectedTracks.get(0);
++			return mk1.trackY == this.trackY && mt1.y == this.trackY ? true : true;
+ 		}
+ 	}
+ 
+-	private void connectToNeighbor(MinecartTrackLogic var1) {
+-		this.connectedTracks.add(new ChunkPosition(var1.trackX, var1.trackY, var1.trackZ));
+-		boolean var2 = this.isInTrack(this.trackX, this.trackY, this.trackZ - 1);
+-		boolean var3 = this.isInTrack(this.trackX, this.trackY, this.trackZ + 1);
+-		boolean var4 = this.isInTrack(this.trackX - 1, this.trackY, this.trackZ);
+-		boolean var5 = this.isInTrack(this.trackX + 1, this.trackY, this.trackZ);
+-		byte var6 = -1;
+-		if(var2 || var3) {
+-			var6 = 0;
++	private void connectToNeighbor(MinecartTrackLogic mk1) {
++		this.connectedTracks.add(new ChunkPosition(mk1.trackX, mk1.trackY, mk1.trackZ));
++		boolean flag = this.isInTrack(this.trackX, this.trackY, this.trackZ - 1);
++		boolean flag1 = this.isInTrack(this.trackX, this.trackY, this.trackZ + 1);
++		boolean flag2 = this.isInTrack(this.trackX - 1, this.trackY, this.trackZ);
++		boolean flag3 = this.isInTrack(this.trackX + 1, this.trackY, this.trackZ);
++		byte byte0 = -1;
++		if(flag || flag1) {
++			byte0 = 0;
+ 		}
+ 
+-		if(var4 || var5) {
+-			var6 = 1;
++		if(flag2 || flag3) {
++			byte0 = 1;
+ 		}
+ 
+-		if(var3 && var5 && !var2 && !var4) {
+-			var6 = 6;
++		if(flag1 && flag3 && !flag && !flag2) {
++			byte0 = 6;
+ 		}
+ 
+-		if(var3 && var4 && !var2 && !var5) {
+-			var6 = 7;
++		if(flag1 && flag2 && !flag && !flag3) {
++			byte0 = 7;
+ 		}
+ 
+-		if(var2 && var4 && !var3 && !var5) {
+-			var6 = 8;
++		if(flag && flag2 && !flag1 && !flag3) {
++			byte0 = 8;
+ 		}
+ 
+-		if(var2 && var5 && !var3 && !var4) {
+-			var6 = 9;
++		if(flag && flag3 && !flag1 && !flag2) {
++			byte0 = 9;
+ 		}
+ 
+-		if(var6 == 0) {
++		if(byte0 == 0) {
+ 			if(this.worldObj.getBlockId(this.trackX, this.trackY + 1, this.trackZ - 1) == this.minecartTrack.blockID) {
+-				var6 = 4;
++				byte0 = 4;
+ 			}
+ 
+ 			if(this.worldObj.getBlockId(this.trackX, this.trackY + 1, this.trackZ + 1) == this.minecartTrack.blockID) {
+-				var6 = 5;
++				byte0 = 5;
+ 			}
+ 		}
+ 
+-		if(var6 == 1) {
++		if(byte0 == 1) {
+ 			if(this.worldObj.getBlockId(this.trackX + 1, this.trackY + 1, this.trackZ) == this.minecartTrack.blockID) {
+-				var6 = 2;
++				byte0 = 2;
+ 			}
+ 
+ 			if(this.worldObj.getBlockId(this.trackX - 1, this.trackY + 1, this.trackZ) == this.minecartTrack.blockID) {
+-				var6 = 3;
++				byte0 = 3;
+ 			}
+ 		}
+ 
+-		if(var6 < 0) {
+-			var6 = 0;
++		if(byte0 < 0) {
++			byte0 = 0;
+ 		}
+ 
+-		this.worldObj.setBlockMetadataWithNotify(this.trackX, this.trackY, this.trackZ, var6);
++		this.worldObj.setBlockMetadataWithNotify(this.trackX, this.trackY, this.trackZ, byte0);
+ 	}
+ 
+-	private boolean canConnectFrom(int var1, int var2, int var3) {
+-		MinecartTrackLogic var4 = this.getMinecartTrackLogic(new ChunkPosition(var1, var2, var3));
+-		if(var4 == null) {
++	private boolean canConnectFrom(int i, int j, int k) {
++		MinecartTrackLogic mk1 = this.getMinecartTrackLogic(new ChunkPosition(i, j, k));
++		if(mk1 == null) {
+ 			return false;
+ 		} else {
+-			var4.refreshConnectedTracks();
+-			return var4.canConnectTo(this);
++			mk1.refreshConnectedTracks();
++			return mk1.canConnectTo(this);
+ 		}
+ 	}
+ 
+-	public void place(boolean var1) {
+-		boolean var2 = this.canConnectFrom(this.trackX, this.trackY, this.trackZ - 1);
+-		boolean var3 = this.canConnectFrom(this.trackX, this.trackY, this.trackZ + 1);
+-		boolean var4 = this.canConnectFrom(this.trackX - 1, this.trackY, this.trackZ);
+-		boolean var5 = this.canConnectFrom(this.trackX + 1, this.trackY, this.trackZ);
+-		byte var6 = -1;
+-		if((var2 || var3) && !var4 && !var5) {
+-			var6 = 0;
++	public void place(boolean flag) {
++		boolean flag1 = this.canConnectFrom(this.trackX, this.trackY, this.trackZ - 1);
++		boolean flag2 = this.canConnectFrom(this.trackX, this.trackY, this.trackZ + 1);
++		boolean flag3 = this.canConnectFrom(this.trackX - 1, this.trackY, this.trackZ);
++		boolean flag4 = this.canConnectFrom(this.trackX + 1, this.trackY, this.trackZ);
++		byte i = -1;
++		if((flag1 || flag2) && !flag3 && !flag4) {
++			i = 0;
+ 		}
+ 
+-		if((var4 || var5) && !var2 && !var3) {
+-			var6 = 1;
++		if((flag3 || flag4) && !flag1 && !flag2) {
++			i = 1;
+ 		}
+ 
+-		if(var3 && var5 && !var2 && !var4) {
+-			var6 = 6;
++		if(flag2 && flag4 && !flag1 && !flag3) {
++			i = 6;
+ 		}
+ 
+-		if(var3 && var4 && !var2 && !var5) {
+-			var6 = 7;
++		if(flag2 && flag3 && !flag1 && !flag4) {
++			i = 7;
+ 		}
+ 
+-		if(var2 && var4 && !var3 && !var5) {
+-			var6 = 8;
++		if(flag1 && flag3 && !flag2 && !flag4) {
++			i = 8;
+ 		}
+ 
+-		if(var2 && var5 && !var3 && !var4) {
+-			var6 = 9;
++		if(flag1 && flag4 && !flag2 && !flag3) {
++			i = 9;
+ 		}
+ 
+-		if(var6 == -1) {
+-			if(var2 || var3) {
+-				var6 = 0;
++		if(i == -1) {
++			if(flag1 || flag2) {
++				i = 0;
+ 			}
+ 
+-			if(var4 || var5) {
+-				var6 = 1;
++			if(flag3 || flag4) {
++				i = 1;
+ 			}
+ 
+-			if(var1) {
+-				if(var3 && var5) {
+-					var6 = 6;
++			if(flag) {
++				if(flag2 && flag4) {
++					i = 6;
+ 				}
+ 
+-				if(var4 && var3) {
+-					var6 = 7;
++				if(flag3 && flag2) {
++					i = 7;
+ 				}
+ 
+-				if(var5 && var2) {
+-					var6 = 9;
++				if(flag4 && flag1) {
++					i = 9;
+ 				}
+ 
+-				if(var2 && var4) {
+-					var6 = 8;
++				if(flag1 && flag3) {
++					i = 8;
+ 				}
+ 			} else {
+-				if(var2 && var4) {
+-					var6 = 8;
++				if(flag1 && flag3) {
++					i = 8;
+ 				}
+ 
+-				if(var5 && var2) {
+-					var6 = 9;
++				if(flag4 && flag1) {
++					i = 9;
+ 				}
+ 
+-				if(var4 && var3) {
+-					var6 = 7;
++				if(flag3 && flag2) {
++					i = 7;
+ 				}
+ 
+-				if(var3 && var5) {
+-					var6 = 6;
++				if(flag2 && flag4) {
++					i = 6;
+ 				}
+ 			}
+ 		}
+ 
+-		if(var6 == 0) {
++		if(i == 0) {
+ 			if(this.worldObj.getBlockId(this.trackX, this.trackY + 1, this.trackZ - 1) == this.minecartTrack.blockID) {
+-				var6 = 4;
++				i = 4;
+ 			}
+ 
+ 			if(this.worldObj.getBlockId(this.trackX, this.trackY + 1, this.trackZ + 1) == this.minecartTrack.blockID) {
+-				var6 = 5;
++				i = 5;
+ 			}
+ 		}
+ 
+-		if(var6 == 1) {
++		if(i == 1) {
+ 			if(this.worldObj.getBlockId(this.trackX + 1, this.trackY + 1, this.trackZ) == this.minecartTrack.blockID) {
+-				var6 = 2;
++				i = 2;
+ 			}
+ 
+ 			if(this.worldObj.getBlockId(this.trackX - 1, this.trackY + 1, this.trackZ) == this.minecartTrack.blockID) {
+-				var6 = 3;
++				i = 3;
+ 			}
+ 		}
+ 
+-		if(var6 < 0) {
+-			var6 = 0;
++		if(i < 0) {
++			i = 0;
+ 		}
+ 
+-		this.trackMetadata = var6;
++		this.trackMetadata = i;
+ 		this.calculateConnectedTracks();
+-		this.worldObj.setBlockMetadataWithNotify(this.trackX, this.trackY, this.trackZ, var6);
++		this.worldObj.setBlockMetadataWithNotify(this.trackX, this.trackY, this.trackZ, i);
+ 
+-		for(int var7 = 0; var7 < this.connectedTracks.size(); ++var7) {
+-			MinecartTrackLogic var8 = this.getMinecartTrackLogic((ChunkPosition)this.connectedTracks.get(var7));
+-			if(var8 != null) {
+-				var8.refreshConnectedTracks();
+-				if(var8.canConnectTo(this)) {
+-					var8.connectToNeighbor(this);
++		for(int j = 0; j < this.connectedTracks.size(); ++j) {
++			MinecartTrackLogic mk1 = this.getMinecartTrackLogic((ChunkPosition)this.connectedTracks.get(j));
++			if(mk1 != null) {
++				mk1.refreshConnectedTracks();
++				if(mk1.canConnectTo(this)) {
++					mk1.connectToNeighbor(this);
+ 				}
+ 			}
+ 		}
+ 
+ 	}
+ 
+-	static int getNAdjacentTracks(MinecartTrackLogic var0) {
+-		return var0.getAdjacentTracks();
++	static int getNAdjacentTracks(MinecartTrackLogic mk1) {
++		return mk1.getAdjacentTracks();
+ 	}
+ }
+Index: minecraft/net/minecraft/src/ModLoader.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/ModLoader.java b/minecraft/net/minecraft/src/ModLoader.java
+new file mode 100644
+--- /dev/null	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
++++ b/minecraft/net/minecraft/src/ModLoader.java	(revision 8c4c1182843fb6f5fa1f5222e1f399914de38b5b)
+@@ -0,0 +1,105 @@
++package net.minecraft.src;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Map;
++import java.util.jar.JarEntry;
++import java.util.jar.JarInputStream;
++
++@SuppressWarnings("unchecked")
++public class ModLoader {
++	private static final List<BaseMod> mods = new ArrayList<BaseMod>();
++
++	static {
++		try {
++			File e = new File(ModLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
++			String name;
++			if (e.isFile() && e.getName().endsWith(".jar")) {
++				JarInputStream var5 = new JarInputStream(new FileInputStream(e));
++				JarEntry var6;
++
++				while (true) {
++					var6 = var5.getNextJarEntry();
++					if (var6 == null) {
++						break;
++					}
++
++					name = var6.getName();
++					if (!var6.isDirectory() && name.startsWith("mod_") && name.endsWith(".class")) {
++						addMod(name.substring(0, name.length() - 6));
++					}
++				}
++			} else if (e.isDirectory()) {
++				File[] files = e.listFiles();
++				if (files != null) {
++					for (File file : files) {
++						name = file.getName();
++						if (file.isFile() && name.startsWith("mod_") && name.endsWith(".class")) {
++							addMod(name.substring(0, name.length() - 6));
++						}
++					}
++				}
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++	}
++
++	private static void addMod(String name) {
++		try {
++			Class<BaseMod> e = (Class<BaseMod>) ModLoader.class.getClassLoader().loadClass(name);
++			if (e.getSuperclass() != BaseMod.class) {
++				return;
++			}
++
++			if (mods.add(e.getConstructor().newInstance())) {
++				System.out.println("Mod Loaded: " + name);
++			}
++		} catch (Exception var2) {
++			var2.printStackTrace();
++		}
++	}
++
++	public static void Init() {
++		System.out.println("Mod Init");
++	}
++
++	public static void AddAllRecipes(CraftingManager recipes) {
++		for (BaseMod mod : mods) mod.AddRecipes(recipes);
++	}
++
++	public static void RegisterAllBlocks(List<Block> registry) {
++		for (BaseMod mod : mods) mod.RegisterBlocks(registry);
++	}
++
++	public static void AddAllRenderers(Map<Class<? extends Entity>, Render> renderers) {
++		for (BaseMod mod : mods) mod.AddRenderer(renderers);
++
++	}
++
++	public static void AddAllEntityIDs() {
++		for (BaseMod mod : mods) mod.AddEntityID();
++	}
++
++	public static int AddAllSmelting(int id) {
++		int result = -1;
++
++		for (int i = 0; i < mods.size() && result == -1; ++i) {
++			result = mods.get(i).AddSmelting(id);
++		}
++
++		return result;
++	}
++
++	public static int AddAllFuel(int id) {
++		int result = 0;
++
++		for (int i = 0; i < mods.size() && result == 0; ++i) {
++			result = mods.get(i).AddFuel(id);
++		}
++
++		return result;
++	}
++}
+Index: minecraft/net/minecraft/src/RenderManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/RenderManager.java b/minecraft/net/minecraft/src/RenderManager.java
+--- a/minecraft/net/minecraft/src/RenderManager.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/RenderManager.java	(revision 404c49ebad9f37cdf25969758b92f5b49d63a119)
+@@ -45,70 +45,71 @@
+ 		this.entityRenderMap.put(EntityFallingSand.class, new RenderFallingSand());
+ 		this.entityRenderMap.put(EntityMinecart.class, new RenderMinecart());
+ 		this.entityRenderMap.put(EntityBoat.class, new RenderBoat());
+-		Iterator var1 = this.entityRenderMap.values().iterator();
++		ModLoader.AddAllRenderers(this.entityRenderMap);
++		Iterator var2 = this.entityRenderMap.values().iterator();
+ 
+-		while(var1.hasNext()) {
+-			Render var2 = (Render)var1.next();
+-			var2.setRenderManager(this);
++		while(var2.hasNext()) {
++			Object localak = var2.next();
++			((Render)localak).setRenderManager(this);
+ 		}
+ 
+ 	}
+ 
+-	public Render getEntityClassRenderObject(Class var1) {
+-		Render var2 = (Render)this.entityRenderMap.get(var1);
+-		if(var2 == null && var1 != Entity.class) {
+-			var2 = this.getEntityClassRenderObject(var1.getSuperclass());
+-			this.entityRenderMap.put(var1, var2);
++	public Render getEntityClassRenderObject(Class paramClass) {
++		Render localak = (Render)this.entityRenderMap.get(paramClass);
++		if(localak == null && paramClass != Entity.class) {
++			localak = this.getEntityClassRenderObject(paramClass.getSuperclass());
++			this.entityRenderMap.put(paramClass, localak);
+ 		}
+ 
+-		return var2;
++		return localak;
+ 	}
+ 
+-	public Render getEntityRenderObject(Entity var1) {
+-		return this.getEntityClassRenderObject(var1.getClass());
++	public Render getEntityRenderObject(Entity paramkh) {
++		return this.getEntityClassRenderObject(paramkh.getClass());
+ 	}
+ 
+-	public void cacheActiveRenderInfo(World var1, RenderEngine var2, FontRenderer var3, EntityPlayer var4, GameSettings var5, float var6) {
+-		this.worldObj = var1;
+-		this.renderEngine = var2;
+-		this.options = var5;
+-		this.player = var4;
+-		this.fontRenderer = var3;
+-		this.playerViewY = var4.prevRotationYaw + (var4.rotationYaw - var4.prevRotationYaw) * var6;
+-		this.playerViewX = var4.prevRotationPitch + (var4.rotationPitch - var4.prevRotationPitch) * var6;
+-		this.viewerPosX = var4.lastTickPosX + (var4.posX - var4.lastTickPosX) * (double)var6;
+-		this.viewerPosY = var4.lastTickPosY + (var4.posY - var4.lastTickPosY) * (double)var6;
+-		this.viewerPosZ = var4.lastTickPosZ + (var4.posZ - var4.lastTickPosZ) * (double)var6;
++	public void cacheActiveRenderInfo(World paramcn, RenderEngine paramey, FontRenderer paramkd, EntityPlayer paramdm, GameSettings paramfr, float paramFloat) {
++		this.worldObj = paramcn;
++		this.renderEngine = paramey;
++		this.options = paramfr;
++		this.player = paramdm;
++		this.fontRenderer = paramkd;
++		this.playerViewY = paramdm.prevRotationYaw + (paramdm.rotationYaw - paramdm.prevRotationYaw) * paramFloat;
++		this.playerViewX = paramdm.prevRotationPitch + (paramdm.rotationPitch - paramdm.prevRotationPitch) * paramFloat;
++		this.viewerPosX = paramdm.lastTickPosX + (paramdm.posX - paramdm.lastTickPosX) * (double)paramFloat;
++		this.viewerPosY = paramdm.lastTickPosY + (paramdm.posY - paramdm.lastTickPosY) * (double)paramFloat;
++		this.viewerPosZ = paramdm.lastTickPosZ + (paramdm.posZ - paramdm.lastTickPosZ) * (double)paramFloat;
+ 	}
+ 
+-	public void renderEntity(Entity var1, float var2) {
+-		double var3 = var1.lastTickPosX + (var1.posX - var1.lastTickPosX) * (double)var2;
+-		double var5 = var1.lastTickPosY + (var1.posY - var1.lastTickPosY) * (double)var2;
+-		double var7 = var1.lastTickPosZ + (var1.posZ - var1.lastTickPosZ) * (double)var2;
+-		float var9 = var1.prevRotationYaw + (var1.rotationYaw - var1.prevRotationYaw) * var2;
+-		float var10 = var1.getBrightness(var2);
+-		GL11.glColor3f(var10, var10, var10);
+-		this.renderEntityWithPosYaw(var1, var3 - renderPosX, var5 - renderPosY, var7 - renderPosZ, var9, var2);
++	public void renderEntity(Entity paramkh, float paramFloat) {
++		double d1 = paramkh.lastTickPosX + (paramkh.posX - paramkh.lastTickPosX) * (double)paramFloat;
++		double d2 = paramkh.lastTickPosY + (paramkh.posY - paramkh.lastTickPosY) * (double)paramFloat;
++		double d3 = paramkh.lastTickPosZ + (paramkh.posZ - paramkh.lastTickPosZ) * (double)paramFloat;
++		float f1 = paramkh.prevRotationYaw + (paramkh.rotationYaw - paramkh.prevRotationYaw) * paramFloat;
++		float f2 = paramkh.getBrightness(paramFloat);
++		GL11.glColor3f(f2, f2, f2);
++		this.renderEntityWithPosYaw(paramkh, d1 - renderPosX, d2 - renderPosY, d3 - renderPosZ, f1, paramFloat);
+ 	}
+ 
+-	public void renderEntityWithPosYaw(Entity var1, double var2, double var4, double var6, float var8, float var9) {
+-		Render var10 = this.getEntityRenderObject(var1);
+-		if(var10 != null) {
+-			var10.doRender(var1, var2, var4, var6, var8, var9);
+-			var10.doRenderShadowAndFire(var1, var2, var4, var6, var8, var9);
++	public void renderEntityWithPosYaw(Entity paramkh, double paramDouble1, double paramDouble2, double paramDouble3, float paramFloat1, float paramFloat2) {
++		Render localak = this.getEntityRenderObject(paramkh);
++		if(localak != null) {
++			localak.doRender(paramkh, paramDouble1, paramDouble2, paramDouble3, paramFloat1, paramFloat2);
++			localak.doRenderShadowAndFire(paramkh, paramDouble1, paramDouble2, paramDouble3, paramFloat1, paramFloat2);
+ 		}
+ 
+ 	}
+ 
+-	public void set(World var1) {
+-		this.worldObj = var1;
++	public void set(World paramcn) {
++		this.worldObj = paramcn;
+ 	}
+ 
+-	public double getDistanceToCamera(double var1, double var3, double var5) {
+-		double var7 = var1 - this.viewerPosX;
+-		double var9 = var3 - this.viewerPosY;
+-		double var11 = var5 - this.viewerPosZ;
+-		return var7 * var7 + var9 * var9 + var11 * var11;
++	public double getDistanceToCamera(double paramDouble1, double paramDouble2, double paramDouble3) {
++		double d1 = paramDouble1 - this.viewerPosX;
++		double d2 = paramDouble2 - this.viewerPosY;
++		double d3 = paramDouble3 - this.viewerPosZ;
++		return d1 * d1 + d2 * d2 + d3 * d3;
+ 	}
+ 
+ 	public FontRenderer getFontRenderer() {
+Index: minecraft/net/minecraft/src/Session.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/Session.java b/minecraft/net/minecraft/src/Session.java
+--- a/minecraft/net/minecraft/src/Session.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/Session.java	(revision 404c49ebad9f37cdf25969758b92f5b49d63a119)
+@@ -9,11 +9,6 @@
+ 	public String sessionId;
+ 	public String mpPassParameter;
+ 
+-	public Session(String var1, String var2) {
+-		this.username = var1;
+-		this.sessionId = var2;
+-	}
+-
+ 	static {
+ 		registeredBlocksList.add(Block.stone);
+ 		registeredBlocksList.add(Block.cobblestone);
+@@ -43,6 +38,12 @@
+ 		registeredBlocksList.add(Block.bookshelf);
+ 		registeredBlocksList.add(Block.tnt);
+ 		registeredBlocksList.add(Block.obsidian);
++		ModLoader.RegisterAllBlocks(registeredBlocksList);
+ 		System.out.println(registeredBlocksList.size());
+ 	}
++
++	public Session(String paramString1, String paramString2) {
++		this.username = paramString1;
++		this.sessionId = paramString2;
++	}
+ }
+Index: minecraft/net/minecraft/src/TileEntityFurnace.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/TileEntityFurnace.java b/minecraft/net/minecraft/src/TileEntityFurnace.java
+--- a/minecraft/net/minecraft/src/TileEntityFurnace.java	(revision bd619ecdd83a62e35a9c92c5e97b03fd3445d9dc)
++++ b/minecraft/net/minecraft/src/TileEntityFurnace.java	(revision 404c49ebad9f37cdf25969758b92f5b49d63a119)
+@@ -10,34 +10,34 @@
+ 		return this.furnaceItemStacks.length;
+ 	}
+ 
+-	public ItemStack getStackInSlot(int var1) {
+-		return this.furnaceItemStacks[var1];
++	public ItemStack getStackInSlot(int paramInt) {
++		return this.furnaceItemStacks[paramInt];
+ 	}
+ 
+-	public ItemStack decrStackSize(int var1, int var2) {
+-		if(this.furnaceItemStacks[var1] != null) {
+-			ItemStack var3;
+-			if(this.furnaceItemStacks[var1].stackSize <= var2) {
+-				var3 = this.furnaceItemStacks[var1];
+-				this.furnaceItemStacks[var1] = null;
+-				return var3;
++	public ItemStack decrStackSize(int paramInt1, int paramInt2) {
++		if(this.furnaceItemStacks[paramInt1] != null) {
++			ItemStack localev;
++			if(this.furnaceItemStacks[paramInt1].stackSize <= paramInt2) {
++				localev = this.furnaceItemStacks[paramInt1];
++				this.furnaceItemStacks[paramInt1] = null;
++				return localev;
+ 			} else {
+-				var3 = this.furnaceItemStacks[var1].splitStack(var2);
+-				if(this.furnaceItemStacks[var1].stackSize == 0) {
+-					this.furnaceItemStacks[var1] = null;
++				localev = this.furnaceItemStacks[paramInt1].splitStack(paramInt2);
++				if(this.furnaceItemStacks[paramInt1].stackSize == 0) {
++					this.furnaceItemStacks[paramInt1] = null;
+ 				}
+ 
+-				return var3;
++				return localev;
+ 			}
+ 		} else {
+ 			return null;
+ 		}
+ 	}
+ 
+-	public void setInventorySlotContents(int var1, ItemStack var2) {
+-		this.furnaceItemStacks[var1] = var2;
+-		if(var2 != null && var2.stackSize > this.getInventoryStackLimit()) {
+-			var2.stackSize = this.getInventoryStackLimit();
++	public void setInventorySlotContents(int paramInt, ItemStack paramev) {
++		this.furnaceItemStacks[paramInt] = paramev;
++		if(paramev != null && paramev.stackSize > this.getInventoryStackLimit()) {
++			paramev.stackSize = this.getInventoryStackLimit();
+ 		}
+ 
+ 	}
+@@ -46,56 +46,56 @@
+ 		return "Chest";
+ 	}
+ 
+-	public void readFromNBT(NBTTagCompound var1) {
+-		super.readFromNBT(var1);
+-		NBTTagList var2 = var1.getTagList("Items");
++	public void readFromNBT(NBTTagCompound paramhm) {
++		super.readFromNBT(paramhm);
++		NBTTagList localki = paramhm.getTagList("Items");
+ 		this.furnaceItemStacks = new ItemStack[this.getSizeInventory()];
+ 
+-		for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
+-			NBTTagCompound var4 = (NBTTagCompound)var2.tagAt(var3);
+-			byte var5 = var4.getByte("Slot");
+-			if(var5 >= 0 && var5 < this.furnaceItemStacks.length) {
+-				this.furnaceItemStacks[var5] = new ItemStack(var4);
++		for(int i = 0; i < localki.tagCount(); ++i) {
++			NBTTagCompound localhm = (NBTTagCompound)localki.tagAt(i);
++			byte j = localhm.getByte("Slot");
++			if(j >= 0 && j < this.furnaceItemStacks.length) {
++				this.furnaceItemStacks[j] = new ItemStack(localhm);
+ 			}
+ 		}
+ 
+-		this.furnaceBurnTime = var1.getShort("BurnTime");
+-		this.furnaceCookTime = var1.getShort("CookTime");
++		this.furnaceBurnTime = paramhm.getShort("BurnTime");
++		this.furnaceCookTime = paramhm.getShort("CookTime");
+ 		this.currentItemBurnTime = this.getItemBurnTime(this.furnaceItemStacks[1]);
+ 	}
+ 
+-	public void writeToNBT(NBTTagCompound var1) {
+-		super.writeToNBT(var1);
+-		var1.setShort("BurnTime", (short)this.furnaceBurnTime);
+-		var1.setShort("CookTime", (short)this.furnaceCookTime);
+-		NBTTagList var2 = new NBTTagList();
++	public void writeToNBT(NBTTagCompound paramhm) {
++		super.writeToNBT(paramhm);
++		paramhm.setShort("BurnTime", (short)this.furnaceBurnTime);
++		paramhm.setShort("CookTime", (short)this.furnaceCookTime);
++		NBTTagList localki = new NBTTagList();
+ 
+-		for(int var3 = 0; var3 < this.furnaceItemStacks.length; ++var3) {
+-			if(this.furnaceItemStacks[var3] != null) {
+-				NBTTagCompound var4 = new NBTTagCompound();
+-				var4.setByte("Slot", (byte)var3);
+-				this.furnaceItemStacks[var3].writeToNBT(var4);
+-				var2.setTag(var4);
++		for(int i = 0; i < this.furnaceItemStacks.length; ++i) {
++			if(this.furnaceItemStacks[i] != null) {
++				NBTTagCompound localhm = new NBTTagCompound();
++				localhm.setByte("Slot", (byte)i);
++				this.furnaceItemStacks[i].writeToNBT(localhm);
++				localki.setTag(localhm);
+ 			}
+ 		}
+ 
+-		var1.setTag("Items", var2);
++		paramhm.setTag("Items", localki);
+ 	}
+ 
+ 	public int getInventoryStackLimit() {
+ 		return 64;
+ 	}
+ 
+-	public int getCookProgressScaled(int var1) {
+-		return this.furnaceCookTime * var1 / 200;
++	public int getCookProgressScaled(int paramInt) {
++		return this.furnaceCookTime * paramInt / 200;
+ 	}
+ 
+-	public int getBurnTimeRemainingScaled(int var1) {
++	public int getBurnTimeRemainingScaled(int paramInt) {
+ 		if(this.currentItemBurnTime == 0) {
+ 			this.currentItemBurnTime = 200;
+ 		}
+ 
+-		return this.furnaceBurnTime * var1 / this.currentItemBurnTime;
++		return this.furnaceBurnTime * paramInt / this.currentItemBurnTime;
+ 	}
+ 
+ 	public boolean isBurning() {
+@@ -103,8 +103,8 @@
+ 	}
+ 
+ 	public void updateEntity() {
+-		boolean var1 = this.furnaceBurnTime > 0;
+-		boolean var2 = false;
++		boolean i = this.furnaceBurnTime > 0;
++		boolean j = false;
+ 		if(this.furnaceBurnTime > 0) {
+ 			--this.furnaceBurnTime;
+ 		}
+@@ -113,9 +113,14 @@
+ 			if(this.furnaceBurnTime == 0 && this.canSmelt()) {
+ 				this.currentItemBurnTime = this.furnaceBurnTime = this.getItemBurnTime(this.furnaceItemStacks[1]);
+ 				if(this.furnaceBurnTime > 0) {
+-					var2 = true;
++					j = true;
+ 					if(this.furnaceItemStacks[1] != null) {
+-						--this.furnaceItemStacks[1].stackSize;
++						if(this.furnaceItemStacks[1].getItem().shiftedIndex == Item.bucketLava.shiftedIndex) {
++							this.furnaceItemStacks[1] = new ItemStack(Item.bucketEmpty);
++						} else {
++							--this.furnaceItemStacks[1].stackSize;
++						}
++
+ 						if(this.furnaceItemStacks[1].stackSize == 0) {
+ 							this.furnaceItemStacks[1] = null;
+ 						}
+@@ -128,19 +133,19 @@
+ 				if(this.furnaceCookTime == 200) {
+ 					this.furnaceCookTime = 0;
+ 					this.smeltItem();
+-					var2 = true;
++					j = true;
+ 				}
+ 			} else {
+ 				this.furnaceCookTime = 0;
+ 			}
+ 
+-			if(var1 != this.furnaceBurnTime > 0) {
+-				var2 = true;
++			if(i != this.furnaceBurnTime > 0) {
++				j = true;
+ 				BlockFurnace.updateFurnaceBlockState(this.furnaceBurnTime > 0, this.worldObj, this.xCoord, this.yCoord, this.zCoord);
+ 			}
+ 		}
+ 
+-		if(var2) {
++		if(j) {
+ 			this.onInventoryChanged();
+ 		}
+ 
+@@ -150,17 +155,17 @@
+ 		if(this.furnaceItemStacks[0] == null) {
+ 			return false;
+ 		} else {
+-			int var1 = this.getCookedItem(this.furnaceItemStacks[0].getItem().shiftedIndex);
+-			return var1 < 0 ? false : (this.furnaceItemStacks[2] == null ? true : (this.furnaceItemStacks[2].itemID != var1 ? false : (this.furnaceItemStacks[2].stackSize < this.getInventoryStackLimit() && this.furnaceItemStacks[2].stackSize < this.furnaceItemStacks[2].getMaxStackSize() ? true : this.furnaceItemStacks[2].stackSize < Item.itemsList[var1].getItemStackLimit())));
++			int i = this.getCookedItem(this.furnaceItemStacks[0].getItem().shiftedIndex);
++			return i < 0 ? false : (this.furnaceItemStacks[1] != null && this.furnaceItemStacks[1].getItem().shiftedIndex == Item.bucketLava.shiftedIndex && this.furnaceItemStacks[1].stackSize > 1 ? false : (this.furnaceItemStacks[2] == null ? true : (this.furnaceItemStacks[2].itemID != i ? false : (this.furnaceItemStacks[2].stackSize < this.getInventoryStackLimit() && this.furnaceItemStacks[2].stackSize < this.furnaceItemStacks[2].getMaxStackSize() ? true : this.furnaceItemStacks[2].stackSize < Item.itemsList[i].getItemStackLimit()))));
+ 		}
+ 	}
+ 
+ 	public void smeltItem() {
+ 		if(this.canSmelt()) {
+-			int var1 = this.getCookedItem(this.furnaceItemStacks[0].getItem().shiftedIndex);
++			int i = this.getCookedItem(this.furnaceItemStacks[0].getItem().shiftedIndex);
+ 			if(this.furnaceItemStacks[2] == null) {
+-				this.furnaceItemStacks[2] = new ItemStack(var1, 1);
+-			} else if(this.furnaceItemStacks[2].itemID == var1) {
++				this.furnaceItemStacks[2] = new ItemStack(i, 1);
++			} else if(this.furnaceItemStacks[2].itemID == i) {
+ 				++this.furnaceItemStacks[2].stackSize;
+ 			}
+ 
+@@ -172,16 +177,16 @@
+ 		}
+ 	}
+ 
+-	private int getCookedItem(int var1) {
+-		return var1 == Block.oreIron.blockID ? Item.ingotIron.shiftedIndex : (var1 == Block.oreGold.blockID ? Item.ingotGold.shiftedIndex : (var1 == Block.oreDiamond.blockID ? Item.diamond.shiftedIndex : (var1 == Block.sand.blockID ? Block.glass.blockID : (var1 == Item.porkRaw.shiftedIndex ? Item.porkCooked.shiftedIndex : (var1 == Block.cobblestone.blockID ? Block.stone.blockID : (var1 == Item.clay.shiftedIndex ? Item.brick.shiftedIndex : -1))))));
++	private int getCookedItem(int paramInt) {
++		return paramInt == Block.oreIron.blockID ? Item.ingotIron.shiftedIndex : (paramInt == Block.oreGold.blockID ? Item.ingotGold.shiftedIndex : (paramInt == Block.oreDiamond.blockID ? Item.diamond.shiftedIndex : (paramInt == Block.sand.blockID ? Block.glass.blockID : (paramInt == Item.porkRaw.shiftedIndex ? Item.porkCooked.shiftedIndex : (paramInt == Block.cobblestone.blockID ? Block.stone.blockID : (paramInt == Item.clay.shiftedIndex ? Item.brick.shiftedIndex : ModLoader.AddAllSmelting(paramInt)))))));
+ 	}
+ 
+-	private int getItemBurnTime(ItemStack var1) {
+-		if(var1 == null) {
++	private int getItemBurnTime(ItemStack paramev) {
++		if(paramev == null) {
+ 			return 0;
+ 		} else {
+-			int var2 = var1.getItem().shiftedIndex;
+-			return var2 < 256 && Block.blocksList[var2].material == Material.wood ? 300 : (var2 == Item.stick.shiftedIndex ? 100 : (var2 == Item.coal.shiftedIndex ? 1600 : (var2 == Item.bucketLava.shiftedIndex ? 20000 : 0)));
++			int i = paramev.getItem().shiftedIndex;
++			return i < 256 && Block.blocksList[i].material == Material.wood ? 300 : (i == Item.stick.shiftedIndex ? 100 : (i == Item.coal.shiftedIndex ? 1600 : (i == Item.bucketLava.shiftedIndex ? 20000 : ModLoader.AddAllFuel(i))));
+ 		}
+ 	}
+ }
