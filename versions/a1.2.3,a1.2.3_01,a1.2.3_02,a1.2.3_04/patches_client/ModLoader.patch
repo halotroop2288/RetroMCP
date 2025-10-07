@@ -1,0 +1,1214 @@
+Index: minecraft/net/minecraft/src/BaseMod.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/BaseMod.java b/minecraft/net/minecraft/src/BaseMod.java
+new file mode 100644
+--- /dev/null	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
++++ b/minecraft/net/minecraft/src/BaseMod.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -0,0 +1,33 @@
++package net.minecraft.src;
++
++import java.util.List;
++import java.util.Map;
++
++public abstract class BaseMod {
++	public void AddRecipes(CraftingManager recipes) {
++	}
++
++	public void RegisterBlocks(List<Block> registry) {
++	}
++
++	public void AddRenderer(Map<Class<? extends Entity>, Render> renderers) {
++	}
++
++	public void AddEntityID() {
++	}
++
++	public void RegisterTileEntity() {
++	}
++
++	public GuiScreen OpenModGUI(EntityPlayerSP player, Object instance) {
++		return null;
++	}
++
++	public int AddSmelting(int id) {
++		return -1;
++	}
++
++	public int AddFuel(int id) {
++		return 0;
++	}
++}
+Index: minecraft/net/minecraft/src/CraftingManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/CraftingManager.java b/minecraft/net/minecraft/src/CraftingManager.java
+--- a/minecraft/net/minecraft/src/CraftingManager.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/CraftingManager.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -3,6 +3,7 @@
+ import java.util.ArrayList;
+ import java.util.Collections;
+ import java.util.HashMap;
++import java.util.Iterator;
+ import java.util.List;
+ 
+ public class CraftingManager {
+@@ -13,6 +14,10 @@
+ 		return instance;
+ 	}
+ 
++	public Iterator getRecipeIter() {
++		return this.recipes.iterator();
++	}
++
+ 	private CraftingManager() {
+ 		(new RecipesTools()).func_1122_a(this);
+ 		(new RecipesWeapons()).func_766_a(this);
+@@ -20,6 +25,7 @@
+ 		(new RecipesFood()).func_976_a(this);
+ 		(new RecipesCrafting()).func_1051_a(this);
+ 		(new RecipesArmor()).func_1148_a(this);
++		ModLoader.AddAllRecipes(this);
+ 		this.addRecipe(new ItemStack(Item.paper, 3), new Object[]{"###", Character.valueOf('#'), Item.reed});
+ 		this.addRecipe(new ItemStack(Item.book, 1), new Object[]{"#", "#", "#", Character.valueOf('#'), Item.paper});
+ 		this.addRecipe(new ItemStack(Block.fence, 2), new Object[]{"###", "###", Character.valueOf('#'), Item.stick});
+@@ -65,62 +71,62 @@
+ 		System.out.println(this.recipes.size() + " recipes");
+ 	}
+ 
+-	void addRecipe(ItemStack var1, Object... var2) {
+-		String var3 = "";
+-		int var4 = 0;
+-		int var5 = 0;
+-		int var6 = 0;
+-		if(var2[var4] instanceof String[]) {
+-			String[] var11 = (String[])((String[])var2[var4++]);
++	void addRecipe(ItemStack paramfo, Object... paramArrayOfObject) {
++		String str1 = "";
++		int i = 0;
++		int j = 0;
++		int k = 0;
++		if(paramArrayOfObject[i] instanceof String[]) {
++			String[] var11 = (String[])paramArrayOfObject[i++];
+ 
+-			for(int var8 = 0; var8 < var11.length; ++var8) {
+-				String var9 = var11[var8];
+-				++var6;
+-				var5 = var9.length();
+-				var3 = var3 + var9;
++			for(int localObject2 = 0; localObject2 < var11.length; ++localObject2) {
++				String n = var11[localObject2];
++				++k;
++				j = n.length();
++				str1 = str1 + n;
+ 			}
+ 		} else {
+-			while(var2[var4] instanceof String) {
+-				String var7 = (String)var2[var4++];
+-				++var6;
+-				var5 = var7.length();
+-				var3 = var3 + var7;
++			while(paramArrayOfObject[i] instanceof String) {
++				String localObject1 = (String)paramArrayOfObject[i++];
++				++k;
++				j = localObject1.length();
++				str1 = str1 + localObject1;
+ 			}
+ 		}
+ 
+ 		HashMap var12;
+ 		int var15;
+-		for(var12 = new HashMap(); var4 < var2.length; var4 += 2) {
+-			Character var13 = (Character)var2[var4];
++		for(var12 = new HashMap(); i < paramArrayOfObject.length; i += 2) {
++			Character var13 = (Character)paramArrayOfObject[i];
+ 			var15 = 0;
+-			if(var2[var4 + 1] instanceof Item) {
+-				var15 = ((Item)var2[var4 + 1]).shiftedIndex;
+-			} else if(var2[var4 + 1] instanceof Block) {
+-				var15 = ((Block)var2[var4 + 1]).blockID;
++			if(paramArrayOfObject[i + 1] instanceof Item) {
++				var15 = ((Item)paramArrayOfObject[i + 1]).shiftedIndex;
++			} else if(paramArrayOfObject[i + 1] instanceof Block) {
++				var15 = ((Block)paramArrayOfObject[i + 1]).blockID;
+ 			}
+ 
+ 			var12.put(var13, Integer.valueOf(var15));
+ 		}
+ 
+-		int[] var14 = new int[var5 * var6];
++		int[] var14 = new int[j * k];
+ 
+-		for(var15 = 0; var15 < var5 * var6; ++var15) {
+-			char var10 = var3.charAt(var15);
+-			if(var12.containsKey(Character.valueOf(var10))) {
+-				var14[var15] = ((Integer)var12.get(Character.valueOf(var10))).intValue();
++		for(var15 = 0; var15 < j * k; ++var15) {
++			char c = str1.charAt(var15);
++			if(var12.containsKey(Character.valueOf(c))) {
++				var14[var15] = ((Integer)var12.get(Character.valueOf(c))).intValue();
+ 			} else {
+ 				var14[var15] = -1;
+ 			}
+ 		}
+ 
+-		this.recipes.add(new CraftingRecipe(var5, var6, var14, var1));
++		this.recipes.add(new CraftingRecipe(j, k, var14, paramfo));
+ 	}
+ 
+-	public ItemStack craft(int[] var1) {
+-		for(int var2 = 0; var2 < this.recipes.size(); ++var2) {
+-			CraftingRecipe var3 = (CraftingRecipe)this.recipes.get(var2);
+-			if(var3.matchRecipe(var1)) {
+-				return var3.createResult(var1);
++	public ItemStack craft(int[] paramArrayOfInt) {
++		for(int i = 0; i < this.recipes.size(); ++i) {
++			CraftingRecipe localcd = (CraftingRecipe)this.recipes.get(i);
++			if(localcd.matchRecipe(paramArrayOfInt)) {
++				return localcd.createResult(paramArrayOfInt);
+ 			}
+ 		}
+ 
+Index: minecraft/net/minecraft/src/EntityList.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/EntityList.java b/minecraft/net/minecraft/src/EntityList.java
+--- a/minecraft/net/minecraft/src/EntityList.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/EntityList.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -9,76 +9,6 @@
+ 	private static Map IDtoClassMapping = new HashMap();
+ 	private static Map classToIDMapping = new HashMap();
+ 
+-	private static void addMapping(Class var0, String var1, int var2) {
+-		stringToClassMapping.put(var1, var0);
+-		classToStringMapping.put(var0, var1);
+-		IDtoClassMapping.put(Integer.valueOf(var2), var0);
+-		classToIDMapping.put(var0, Integer.valueOf(var2));
+-	}
+-
+-	public static Entity createEntityInWorld(String var0, World var1) {
+-		Entity var2 = null;
+-
+-		try {
+-			Class var3 = (Class)stringToClassMapping.get(var0);
+-			if(var3 != null) {
+-				var2 = (Entity)var3.getConstructor(new Class[]{World.class}).newInstance(new Object[]{var1});
+-			}
+-		} catch (Exception var4) {
+-			var4.printStackTrace();
+-		}
+-
+-		return var2;
+-	}
+-
+-	public static Entity createEntityFromNBT(NBTTagCompound var0, World var1) {
+-		Entity var2 = null;
+-
+-		try {
+-			Class var3 = (Class)stringToClassMapping.get(var0.func_755_i("id"));
+-			if(var3 != null) {
+-				var2 = (Entity)var3.getConstructor(new Class[]{World.class}).newInstance(new Object[]{var1});
+-			}
+-		} catch (Exception var4) {
+-			var4.printStackTrace();
+-		}
+-
+-		if(var2 != null) {
+-			var2.readFromNBT(var0);
+-		} else {
+-			System.out.println("Skipping Entity with id " + var0.func_755_i("id"));
+-		}
+-
+-		return var2;
+-	}
+-
+-	public static Entity createEntity(int var0, World var1) {
+-		Entity var2 = null;
+-
+-		try {
+-			Class var3 = (Class)IDtoClassMapping.get(Integer.valueOf(var0));
+-			if(var3 != null) {
+-				var2 = (Entity)var3.getConstructor(new Class[]{World.class}).newInstance(new Object[]{var1});
+-			}
+-		} catch (Exception var4) {
+-			var4.printStackTrace();
+-		}
+-
+-		if(var2 == null) {
+-			System.out.println("Skipping Entity with id " + var0);
+-		}
+-
+-		return var2;
+-	}
+-
+-	public static int getEntityID(Entity var0) {
+-		return ((Integer)classToIDMapping.get(var0.getClass())).intValue();
+-	}
+-
+-	public static String getEntityString(Entity var0) {
+-		return (String)classToStringMapping.get(var0.getClass());
+-	}
+-
+ 	static {
+ 		addMapping(EntityArrow.class, "Arrow", 10);
+ 		addMapping(EntitySnowball.class, "Snowball", 11);
+@@ -101,6 +31,83 @@
+ 		addMapping(EntityTNTPrimed.class, "PrimedTnt", 20);
+ 		addMapping(EntityFallingSand.class, "FallingSand", 21);
+ 		addMapping(EntityMinecart.class, "Minecart", 40);
+-		addMapping(EntityBoat.class, "Boat", 41);
++
++		try {
++			addMapping(Class.forName("net.minecraft.src.EntityBoat"), "Boat", 41);
++		} catch (ClassNotFoundException var1) {
++			var1.printStackTrace();
++		}
++
++		ModLoader.AddAllEntityIDs();
++	}
++
++	public static void addMapping(Class paramClass, String paramString, int paramInt) {
++		stringToClassMapping.put(paramString, paramClass);
++		classToStringMapping.put(paramClass, paramString);
++		IDtoClassMapping.put(Integer.valueOf(paramInt), paramClass);
++		classToIDMapping.put(paramClass, Integer.valueOf(paramInt));
++	}
++
++	public static Entity createEntityInWorld(String paramString, World paramcx) {
++		Entity locallu = null;
++
++		try {
++			Class localException = (Class)stringToClassMapping.get(paramString);
++			if(localException != null) {
++				locallu = (Entity)localException.getConstructor(new Class[]{World.class}).newInstance(new Object[]{paramcx});
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++		return locallu;
++	}
++
++	public static Entity createEntityFromNBT(NBTTagCompound paramip, World paramcx) {
++		Entity locallu = null;
++
++		try {
++			Class localException = (Class)stringToClassMapping.get(paramip.func_755_i("id"));
++			if(localException != null) {
++				locallu = (Entity)localException.getConstructor(new Class[]{World.class}).newInstance(new Object[]{paramcx});
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++		if(locallu != null) {
++			locallu.readFromNBT(paramip);
++		} else {
++			System.out.println("Skipping Entity with id " + paramip.func_755_i("id"));
++		}
++
++		return locallu;
++	}
++
++	public static Entity createEntity(int paramInt, World paramcx) {
++		Entity locallu = null;
++
++		try {
++			Class localException = (Class)IDtoClassMapping.get(Integer.valueOf(paramInt));
++			if(localException != null) {
++				locallu = (Entity)localException.getConstructor(new Class[]{World.class}).newInstance(new Object[]{paramcx});
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++		if(locallu == null) {
++			System.out.println("Skipping Entity with id " + paramInt);
++		}
++
++		return locallu;
++	}
++
++	public static int getEntityID(Entity paramlu) {
++		return ((Integer)classToIDMapping.get(paramlu.getClass())).intValue();
++	}
++
++	public static String getEntityString(Entity paramlu) {
++		return (String)classToStringMapping.get(paramlu.getClass());
+ 	}
+ }
+Index: minecraft/net/minecraft/src/EntityPlayerSP.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/EntityPlayerSP.java b/minecraft/net/minecraft/src/EntityPlayerSP.java
+--- a/minecraft/net/minecraft/src/EntityPlayerSP.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/EntityPlayerSP.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -10,16 +10,16 @@
+ 	public float field_4134_c;
+ 	public float field_4133_d;
+ 
+-	public EntityPlayerSP(Minecraft var1, World var2, Session var3, int var4) {
+-		super(var2);
+-		this.field_788_bg = var1;
+-		this.dimension = var4;
+-		if(var3 != null && var3.field_1666_b != null && var3.field_1666_b.length() > 0) {
+-			this.skinUrl = "http://www.minecraft.net/skin/" + var3.field_1666_b + ".png";
++	public EntityPlayerSP(Minecraft paramMinecraft, World paramcx, Session paramdz, int paramInt) {
++		super(paramcx);
++		this.field_788_bg = paramMinecraft;
++		this.dimension = paramInt;
++		if(paramdz != null && paramdz.field_1666_b != null && paramdz.field_1666_b.length() > 0) {
++			this.skinUrl = "http://www.minecraft.net/skin/" + paramdz.field_1666_b + ".png";
+ 			System.out.println("Loading texture " + this.skinUrl);
+ 		}
+ 
+-		this.field_771_i = var3.field_1666_b;
++		this.field_771_i = paramdz.field_1666_b;
+ 	}
+ 
+ 	public void func_418_b_() {
+@@ -71,51 +71,63 @@
+ 		this.field_787_a.func_798_a();
+ 	}
+ 
+-	public void func_460_a(int var1, boolean var2) {
+-		this.field_787_a.func_796_a(var1, var2);
++	public void func_460_a(int paramInt, boolean paramBoolean) {
++		this.field_787_a.func_796_a(paramInt, paramBoolean);
+ 	}
+ 
+-	public void writeEntityToNBT(NBTTagCompound var1) {
+-		super.writeEntityToNBT(var1);
+-		var1.func_758_a("Score", this.field_9370_g);
++	public void writeEntityToNBT(NBTTagCompound paramip) {
++		super.writeEntityToNBT(paramip);
++		paramip.func_758_a("Score", this.field_9370_g);
+ 	}
+ 
+-	public void readEntityFromNBT(NBTTagCompound var1) {
+-		super.readEntityFromNBT(var1);
+-		this.field_9370_g = var1.func_756_e("Score");
++	public void readEntityFromNBT(NBTTagCompound paramip) {
++		super.readEntityFromNBT(paramip);
++		this.field_9370_g = paramip.func_756_e("Score");
+ 	}
+ 
+-	public void displayGUIChest(IInventory var1) {
+-		this.field_788_bg.displayGuiScreen(new GuiChest(this.inventory, var1));
++	public void displayGUIChest(IInventory paramhh) {
++		this.field_788_bg.displayGuiScreen(new GuiChest(this.inventory, paramhh));
+ 	}
+ 
+-	public void displayGUIEditSign(TileEntitySign var1) {
+-		this.field_788_bg.displayGuiScreen(new GuiEditSign(var1));
++	public void displayGUIEditSign(TileEntitySign paramqa) {
++		this.field_788_bg.displayGuiScreen(new GuiEditSign(paramqa));
+ 	}
+ 
+ 	public void displayGUICrafting() {
+ 		this.field_788_bg.displayGuiScreen(new GuiCrafting(this.inventory));
+ 	}
+ 
+-	public void displayGUIFurnace(TileEntityFurnace var1) {
+-		this.field_788_bg.displayGuiScreen(new GuiFurnace(this.inventory, var1));
++	public void displayGUIFurnace(TileEntityFurnace paramlr) {
++		this.field_788_bg.displayGuiScreen(new GuiFurnace(this.inventory, paramlr));
+ 	}
++
++	public void func_443_a_(Entity paramlu, int paramInt) {
++		this.field_788_bg.field_6321_h.func_1192_a(new EntityPickupFX(this.field_788_bg.theWorld, paramlu, this, -0.5F));
++	}
++
++	public void openModGUI(Object instance) {
++		GuiScreen gui = ModLoader.OpenModGUI(this, instance);
++		if(gui != null) {
++			this.field_788_bg.displayGuiScreen(gui);
++		}
+ 
+-	public void func_443_a_(Entity var1, int var2) {
+-		this.field_788_bg.field_6321_h.func_1192_a(new EntityPickupFX(this.field_788_bg.theWorld, var1, this, -0.5F));
++	}
++
++	public boolean isGUIOpen(Class gui) {
++		return gui == null ? this.field_788_bg.currentScreen == null : (this.field_788_bg.currentScreen == null && gui != null ? false : gui.isInstance(this.field_788_bg.currentScreen));
+ 	}
+ 
+ 	public int func_6419_n() {
+ 		return this.inventory.func_506_f();
+ 	}
+ 
+-	public void func_6415_a_(Entity var1) {
+-		if(!var1.interact(this)) {
+-			ItemStack var2 = this.func_6416_v();
+-			if(var2 != null && var1 instanceof EntityLiving) {
+-				var2.func_1100_b((EntityLiving)var1);
+-				if(var2.stackSize <= 0) {
+-					var2.func_1097_a(this);
++	public void func_6415_a_(Entity paramlu) {
++		if(!paramlu.interact(this)) {
++			ItemStack localfo = this.func_6416_v();
++			if(localfo != null && paramlu instanceof EntityLiving) {
++				localfo.func_1100_b((EntityLiving)paramlu);
++				if(localfo.stackSize <= 0) {
++					localfo.func_1097_a(this);
+ 					this.func_448_u();
+ 				}
+ 			}
+@@ -123,7 +135,7 @@
+ 		}
+ 	}
+ 
+-	public void func_461_a(String var1) {
++	public void func_461_a(String paramString) {
+ 	}
+ 
+ 	public void func_6420_o() {
+@@ -141,15 +153,15 @@
+ 		}
+ 	}
+ 
+-	public void func_9372_a_(int var1) {
+-		int var2 = this.field_9337_J - var1;
+-		if(var2 <= 0) {
+-			this.field_9337_J = var1;
++	public void func_9372_a_(int paramInt) {
++		int i = this.field_9337_J - paramInt;
++		if(i <= 0) {
++			this.field_9337_J = paramInt;
+ 		} else {
+-			this.field_9346_af = var2;
++			this.field_9346_af = i;
+ 			this.field_9335_K = this.field_9337_J;
+ 			this.field_9306_bj = this.field_9366_o;
+-			this.func_4044_a(var2);
++			this.func_4044_a(i);
+ 			this.hurtTime = this.field_9332_M = 10;
+ 		}
+ 
+Index: minecraft/net/minecraft/src/ModLoader.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/ModLoader.java b/minecraft/net/minecraft/src/ModLoader.java
+new file mode 100644
+--- /dev/null	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
++++ b/minecraft/net/minecraft/src/ModLoader.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -0,0 +1,146 @@
++package net.minecraft.src;
++
++import java.io.File;
++import java.io.FileInputStream;
++import java.io.IOException;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Map;
++import java.util.zip.ZipEntry;
++import java.util.zip.ZipInputStream;
++
++public final class ModLoader {
++	private static final List<BaseMod> mods = new ArrayList<BaseMod>();
++
++	static {
++		try {
++			File e = new File(ModLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
++			readFromClassPath(e);
++		} catch (Exception var1) {
++			var1.printStackTrace();
++		}
++	}
++
++	private static void readFromClassPath(File source) throws IOException {
++		ClassLoader loader = ModLoader.class.getClassLoader();
++		String name;
++		if (source.isFile() && (source.getName().endsWith(".jar") || source.getName().endsWith(".zip"))) {
++			ZipInputStream var5 = new ZipInputStream(new FileInputStream(source));
++			ZipEntry var7;
++
++			while (true) {
++				var7 = var5.getNextEntry();
++				if (var7 == null) {
++					break;
++				}
++
++				name = var7.getName();
++				if (!var7.isDirectory() && name.startsWith("mod_") && name.endsWith(".class")) {
++					addMod(loader, name);
++				}
++			}
++		} else if (source.isDirectory()) {
++			File[] i = source.listFiles();
++			if (i != null) {
++				for (File file : i) {
++					name = file.getName();
++					if (file.isFile() && name.startsWith("mod_") && name.endsWith(".class")) {
++						addMod(loader, name);
++					}
++				}
++			}
++		}
++
++		for (int var6 = 0; var6 < 256; ++var6) {
++			if (Block.blocksList[var6] != null && Item.itemsList[var6] == null) {
++				Item.itemsList[var6] = new ItemBlock(var6 - 256);
++			}
++		}
++
++	}
++
++	private static void addMod(ClassLoader loader, String filename) {
++		try {
++			String e = filename.substring(0, filename.length() - 6);
++			Class<BaseMod> instclass = (Class<BaseMod>) loader.loadClass(e);
++			if (instclass.getSuperclass() != BaseMod.class) {
++				return;
++			}
++
++			if (mods.add(instclass.getConstructor().newInstance())) {
++				System.out.println("Mod Loaded: " + e);
++			}
++		} catch (Exception var4) {
++			var4.printStackTrace();
++		}
++
++	}
++
++	public static boolean isModLoaded(String mod) {
++		try {
++			for (BaseMod baseMod : mods) {
++				if (Class.forName(mod).isInstance(baseMod)) {
++					return true;
++				}
++			}
++
++			return false;
++		} catch (ClassNotFoundException var2) {
++			return false;
++		}
++	}
++
++	public static void AddAllRecipes(CraftingManager recipes) {
++		for (BaseMod mod : mods) {
++			mod.AddRecipes(recipes);
++		}
++
++	}
++
++	public static void RegisterAllBlocks(List<Block> registry) {
++		for (BaseMod mod : mods) mod.RegisterBlocks(registry);
++
++	}
++
++	public static void AddAllRenderers(Map<Class<? extends Entity>, Render> renderers) {
++		for (BaseMod mod : mods) mod.AddRenderer(renderers);
++	}
++
++	public static void AddAllEntityIDs() {
++		for (BaseMod mod : mods) mod.AddEntityID();
++	}
++
++	public static void RegisterAllTileEntities() {
++		for (BaseMod mod : mods) mod.RegisterTileEntity();
++	}
++
++	public static GuiScreen OpenModGUI(EntityPlayerSP player, Object instance) {
++		GuiScreen gui = null;
++
++		for (int i = 0; i < mods.size() && gui == null; ++i) {
++			gui = mods.get(i).OpenModGUI(player, instance);
++		}
++
++		return gui;
++	}
++
++	public static int AddAllSmelting(int id) {
++		int result = -1;
++
++		for (int i = 0; i < mods.size() && result == -1; ++i) {
++			result = mods.get(i).AddSmelting(id);
++		}
++
++		return result;
++	}
++
++	public static int AddAllFuel(int id) {
++		int result = 0;
++
++		for (int i = 0; i < mods.size() && result == 0; ++i) {
++			result = mods.get(i).AddFuel(id);
++		}
++
++		return result;
++	}
++}
+Index: minecraft/net/minecraft/src/RenderManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/RenderManager.java b/minecraft/net/minecraft/src/RenderManager.java
+--- a/minecraft/net/minecraft/src/RenderManager.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/RenderManager.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -46,72 +46,79 @@
+ 		this.entityRenderMap.put(EntityTNTPrimed.class, new RenderTNTPrimed());
+ 		this.entityRenderMap.put(EntityFallingSand.class, new RenderFallingSand());
+ 		this.entityRenderMap.put(EntityMinecart.class, new RenderMinecart());
+-		this.entityRenderMap.put(EntityBoat.class, new RenderBoat());
++
++		try {
++			this.entityRenderMap.put(Class.forName("net.minecraft.src.EntityBoat"), new RenderBoat());
++		} catch (ClassNotFoundException var3) {
++			var3.printStackTrace();
++		}
++
+ 		this.entityRenderMap.put(EntityFish.class, new RenderFish());
+-		Iterator var1 = this.entityRenderMap.values().iterator();
++		ModLoader.AddAllRenderers(this.entityRenderMap);
++		Iterator var2 = this.entityRenderMap.values().iterator();
+ 
+-		while(var1.hasNext()) {
+-			Render var2 = (Render)var1.next();
+-			var2.setRenderManager(this);
++		while(var2.hasNext()) {
++			Render localaq = (Render)var2.next();
++			localaq.setRenderManager(this);
+ 		}
+ 
+ 	}
+ 
+-	public Render func_4117_a(Class var1) {
+-		Render var2 = (Render)this.entityRenderMap.get(var1);
+-		if(var2 == null && var1 != Entity.class) {
+-			var2 = this.func_4117_a(var1.getSuperclass());
+-			this.entityRenderMap.put(var1, var2);
++	public Render func_4117_a(Class paramClass) {
++		Render localaq = (Render)this.entityRenderMap.get(paramClass);
++		if(localaq == null && paramClass != Entity.class) {
++			localaq = this.func_4117_a(paramClass.getSuperclass());
++			this.entityRenderMap.put(paramClass, localaq);
+ 		}
+ 
+-		return var2;
++		return localaq;
+ 	}
+ 
+-	public Render func_855_a(Entity var1) {
+-		return this.func_4117_a(var1.getClass());
++	public Render func_855_a(Entity paramlu) {
++		return this.func_4117_a(paramlu.getClass());
+ 	}
+ 
+-	public void func_857_a(World var1, RenderEngine var2, FontRenderer var3, EntityPlayer var4, GameSettings var5, float var6) {
+-		this.worldObj = var1;
+-		this.renderEngine = var2;
+-		this.options = var5;
+-		this.field_1226_h = var4;
+-		this.field_1218_p = var3;
+-		this.field_1225_i = var4.prevRotationYaw + (var4.rotationYaw - var4.prevRotationYaw) * var6;
+-		this.field_1224_j = var4.prevRotationPitch + (var4.rotationPitch - var4.prevRotationPitch) * var6;
+-		this.field_1222_l = var4.lastTickPosX + (var4.posX - var4.lastTickPosX) * (double)var6;
+-		this.field_1221_m = var4.lastTickPosY + (var4.posY - var4.lastTickPosY) * (double)var6;
+-		this.field_1220_n = var4.lastTickPosZ + (var4.posZ - var4.lastTickPosZ) * (double)var6;
++	public void func_857_a(World paramcx, RenderEngine paramft, FontRenderer paramlq, EntityPlayer paramea, GameSettings paramgp, float paramFloat) {
++		this.worldObj = paramcx;
++		this.renderEngine = paramft;
++		this.options = paramgp;
++		this.field_1226_h = paramea;
++		this.field_1218_p = paramlq;
++		this.field_1225_i = paramea.prevRotationYaw + (paramea.rotationYaw - paramea.prevRotationYaw) * paramFloat;
++		this.field_1224_j = paramea.prevRotationPitch + (paramea.rotationPitch - paramea.prevRotationPitch) * paramFloat;
++		this.field_1222_l = paramea.lastTickPosX + (paramea.posX - paramea.lastTickPosX) * (double)paramFloat;
++		this.field_1221_m = paramea.lastTickPosY + (paramea.posY - paramea.lastTickPosY) * (double)paramFloat;
++		this.field_1220_n = paramea.lastTickPosZ + (paramea.posZ - paramea.lastTickPosZ) * (double)paramFloat;
+ 	}
+ 
+-	public void func_854_a(Entity var1, float var2) {
+-		double var3 = var1.lastTickPosX + (var1.posX - var1.lastTickPosX) * (double)var2;
+-		double var5 = var1.lastTickPosY + (var1.posY - var1.lastTickPosY) * (double)var2;
+-		double var7 = var1.lastTickPosZ + (var1.posZ - var1.lastTickPosZ) * (double)var2;
+-		float var9 = var1.prevRotationYaw + (var1.rotationYaw - var1.prevRotationYaw) * var2;
+-		float var10 = var1.getEntityBrightness(var2);
+-		GL11.glColor3f(var10, var10, var10);
+-		this.func_853_a(var1, var3 - field_1232_b, var5 - field_1231_c, var7 - field_1230_d, var9, var2);
++	public void func_854_a(Entity paramlu, float paramFloat) {
++		double d1 = paramlu.lastTickPosX + (paramlu.posX - paramlu.lastTickPosX) * (double)paramFloat;
++		double d2 = paramlu.lastTickPosY + (paramlu.posY - paramlu.lastTickPosY) * (double)paramFloat;
++		double d3 = paramlu.lastTickPosZ + (paramlu.posZ - paramlu.lastTickPosZ) * (double)paramFloat;
++		float f1 = paramlu.prevRotationYaw + (paramlu.rotationYaw - paramlu.prevRotationYaw) * paramFloat;
++		float f2 = paramlu.getEntityBrightness(paramFloat);
++		GL11.glColor3f(f2, f2, f2);
++		this.func_853_a(paramlu, d1 - field_1232_b, d2 - field_1231_c, d3 - field_1230_d, f1, paramFloat);
+ 	}
+ 
+-	public void func_853_a(Entity var1, double var2, double var4, double var6, float var8, float var9) {
+-		Render var10 = this.func_855_a(var1);
+-		if(var10 != null) {
+-			var10.doRender(var1, var2, var4, var6, var8, var9);
+-			var10.doRenderShadowAndFire(var1, var2, var4, var6, var8, var9);
++	public void func_853_a(Entity paramlu, double paramDouble1, double paramDouble2, double paramDouble3, float paramFloat1, float paramFloat2) {
++		Render localaq = this.func_855_a(paramlu);
++		if(localaq != null) {
++			localaq.doRender(paramlu, paramDouble1, paramDouble2, paramDouble3, paramFloat1, paramFloat2);
++			localaq.doRenderShadowAndFire(paramlu, paramDouble1, paramDouble2, paramDouble3, paramFloat1, paramFloat2);
+ 		}
+ 
+ 	}
+ 
+-	public void func_852_a(World var1) {
+-		this.worldObj = var1;
++	public void func_852_a(World paramcx) {
++		this.worldObj = paramcx;
+ 	}
+ 
+-	public double func_851_a(double var1, double var3, double var5) {
+-		double var7 = var1 - this.field_1222_l;
+-		double var9 = var3 - this.field_1221_m;
+-		double var11 = var5 - this.field_1220_n;
+-		return var7 * var7 + var9 * var9 + var11 * var11;
++	public double func_851_a(double paramDouble1, double paramDouble2, double paramDouble3) {
++		double d1 = paramDouble1 - this.field_1222_l;
++		double d2 = paramDouble2 - this.field_1221_m;
++		double d3 = paramDouble3 - this.field_1220_n;
++		return d1 * d1 + d2 * d2 + d3 * d3;
+ 	}
+ 
+ 	public FontRenderer getFontRenderer() {
+Index: minecraft/net/minecraft/src/Session.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/Session.java b/minecraft/net/minecraft/src/Session.java
+--- a/minecraft/net/minecraft/src/Session.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/Session.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -9,11 +9,6 @@
+ 	public String field_6543_c;
+ 	public String field_6542_d;
+ 
+-	public Session(String var1, String var2) {
+-		this.field_1666_b = var1;
+-		this.field_6543_c = var2;
+-	}
+-
+ 	static {
+ 		field_1667_a.add(Block.stone);
+ 		field_1667_a.add(Block.cobblestone);
+@@ -43,6 +38,12 @@
+ 		field_1667_a.add(Block.bookShelf);
+ 		field_1667_a.add(Block.tnt);
+ 		field_1667_a.add(Block.obsidian);
++		ModLoader.RegisterAllBlocks(field_1667_a);
+ 		System.out.println(field_1667_a.size());
+ 	}
++
++	public Session(String paramString1, String paramString2) {
++		this.field_1666_b = paramString1;
++		this.field_6543_c = paramString2;
++	}
+ }
+Index: minecraft/net/minecraft/src/TileEntity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/TileEntity.java b/minecraft/net/minecraft/src/TileEntity.java
+--- a/minecraft/net/minecraft/src/TileEntity.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/TileEntity.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -11,55 +11,63 @@
+ 	public int yCoord;
+ 	public int zCoord;
+ 
+-	private static void func_476_a(Class var0, String var1) {
+-		if(classToNameMap.containsKey(var1)) {
+-			throw new IllegalArgumentException("Duplicate id: " + var1);
++	static {
++		func_476_a(TileEntityFurnace.class, "Furnace");
++		func_476_a(TileEntityChest.class, "Chest");
++		func_476_a(TileEntitySign.class, "Sign");
++		func_476_a(TileEntityMobSpawner.class, "MobSpawner");
++		ModLoader.RegisterAllTileEntities();
++	}
++
++	public static void func_476_a(Class paramClass, String paramString) {
++		if(classToNameMap.containsKey(paramString)) {
++			throw new IllegalArgumentException("Duplicate id: " + paramString);
+ 		} else {
+-			nameToClassMap.put(var1, var0);
+-			classToNameMap.put(var0, var1);
++			nameToClassMap.put(paramString, paramClass);
++			classToNameMap.put(paramClass, paramString);
+ 		}
+ 	}
+ 
+-	public void readFromNBT(NBTTagCompound var1) {
+-		this.xCoord = var1.func_756_e("x");
+-		this.yCoord = var1.func_756_e("y");
+-		this.zCoord = var1.func_756_e("z");
++	public void readFromNBT(NBTTagCompound paramip) {
++		this.xCoord = paramip.func_756_e("x");
++		this.yCoord = paramip.func_756_e("y");
++		this.zCoord = paramip.func_756_e("z");
+ 	}
+ 
+-	public void writeToNBT(NBTTagCompound var1) {
+-		String var2 = (String)classToNameMap.get(this.getClass());
+-		if(var2 == null) {
++	public void writeToNBT(NBTTagCompound paramip) {
++		String str = (String)classToNameMap.get(this.getClass());
++		if(str == null) {
+ 			throw new RuntimeException(this.getClass() + " is missing a mapping! This is a bug!");
+ 		} else {
+-			var1.func_754_a("id", var2);
+-			var1.func_758_a("x", this.xCoord);
+-			var1.func_758_a("y", this.yCoord);
+-			var1.func_758_a("z", this.zCoord);
++			paramip.func_754_a("id", str);
++			paramip.func_758_a("x", this.xCoord);
++			paramip.func_758_a("y", this.yCoord);
++			paramip.func_758_a("z", this.zCoord);
+ 		}
+ 	}
+ 
+ 	public void updateEntity() {
+ 	}
+ 
+-	public static TileEntity func_477_c(NBTTagCompound var0) {
+-		TileEntity var1 = null;
++	public static TileEntity func_477_c(NBTTagCompound paramip) {
++		TileEntity localjh = null;
+ 
+ 		try {
+-			Class var2 = (Class)nameToClassMap.get(var0.func_755_i("id"));
+-			if(var2 != null) {
+-				var1 = (TileEntity)var2.newInstance();
++			Class localException = (Class)nameToClassMap.get(paramip.func_755_i("id"));
++			if(localException != null) {
++				localjh = (TileEntity)localException.newInstance();
+ 			}
+ 		} catch (Exception var3) {
+ 			var3.printStackTrace();
+ 		}
+ 
+-		if(var1 != null) {
+-			var1.readFromNBT(var0);
++		if(localjh != null) {
++			localjh.readFromNBT(paramip);
+ 		} else {
+-			System.out.println("Skipping TileEntity with id " + var0.func_755_i("id"));
++			System.out.println("Skipping TileEntity with id " + paramip.func_755_i("id"));
+ 		}
+ 
+-		return var1;
++		return localjh;
+ 	}
+ 
+ 	public int func_479_f() {
+@@ -70,21 +78,14 @@
+ 		this.worldObj.func_698_b(this.xCoord, this.yCoord, this.zCoord, this);
+ 	}
+ 
+-	public double func_480_a(double var1, double var3, double var5) {
+-		double var7 = (double)this.xCoord + 0.5D - var1;
+-		double var9 = (double)this.yCoord + 0.5D - var3;
+-		double var11 = (double)this.zCoord + 0.5D - var5;
+-		return var7 * var7 + var9 * var9 + var11 * var11;
++	public double func_480_a(double paramDouble1, double paramDouble2, double paramDouble3) {
++		double d1 = (double)this.xCoord + 0.5D - paramDouble1;
++		double d2 = (double)this.yCoord + 0.5D - paramDouble2;
++		double d3 = (double)this.zCoord + 0.5D - paramDouble3;
++		return d1 * d1 + d2 * d2 + d3 * d3;
+ 	}
+ 
+ 	public Block func_478_g() {
+ 		return Block.blocksList[this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord)];
+ 	}
+-
+-	static {
+-		func_476_a(TileEntityFurnace.class, "Furnace");
+-		func_476_a(TileEntityChest.class, "Chest");
+-		func_476_a(TileEntitySign.class, "Sign");
+-		func_476_a(TileEntityMobSpawner.class, "MobSpawner");
+-	}
+ }
+Index: minecraft/net/minecraft/src/TileEntityFurnace.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/TileEntityFurnace.java b/minecraft/net/minecraft/src/TileEntityFurnace.java
+--- a/minecraft/net/minecraft/src/TileEntityFurnace.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/TileEntityFurnace.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -10,34 +10,34 @@
+ 		return this.furnaceItemStacks.length;
+ 	}
+ 
+-	public ItemStack getStackInSlot(int var1) {
+-		return this.furnaceItemStacks[var1];
++	public ItemStack getStackInSlot(int paramInt) {
++		return this.furnaceItemStacks[paramInt];
+ 	}
+ 
+-	public ItemStack decrStackSize(int var1, int var2) {
+-		if(this.furnaceItemStacks[var1] != null) {
+-			ItemStack var3;
+-			if(this.furnaceItemStacks[var1].stackSize <= var2) {
+-				var3 = this.furnaceItemStacks[var1];
+-				this.furnaceItemStacks[var1] = null;
+-				return var3;
++	public ItemStack decrStackSize(int paramInt1, int paramInt2) {
++		if(this.furnaceItemStacks[paramInt1] != null) {
++			ItemStack localfo;
++			if(this.furnaceItemStacks[paramInt1].stackSize <= paramInt2) {
++				localfo = this.furnaceItemStacks[paramInt1];
++				this.furnaceItemStacks[paramInt1] = null;
++				return localfo;
+ 			} else {
+-				var3 = this.furnaceItemStacks[var1].func_1085_a(var2);
+-				if(this.furnaceItemStacks[var1].stackSize == 0) {
+-					this.furnaceItemStacks[var1] = null;
++				localfo = this.furnaceItemStacks[paramInt1].func_1085_a(paramInt2);
++				if(this.furnaceItemStacks[paramInt1].stackSize == 0) {
++					this.furnaceItemStacks[paramInt1] = null;
+ 				}
+ 
+-				return var3;
++				return localfo;
+ 			}
+ 		} else {
+ 			return null;
+ 		}
+ 	}
+ 
+-	public void setInventorySlotContents(int var1, ItemStack var2) {
+-		this.furnaceItemStacks[var1] = var2;
+-		if(var2 != null && var2.stackSize > this.getInventoryStackLimit()) {
+-			var2.stackSize = this.getInventoryStackLimit();
++	public void setInventorySlotContents(int paramInt, ItemStack paramfo) {
++		this.furnaceItemStacks[paramInt] = paramfo;
++		if(paramfo != null && paramfo.stackSize > this.getInventoryStackLimit()) {
++			paramfo.stackSize = this.getInventoryStackLimit();
+ 		}
+ 
+ 	}
+@@ -46,56 +46,56 @@
+ 		return "Chest";
+ 	}
+ 
+-	public void readFromNBT(NBTTagCompound var1) {
+-		super.readFromNBT(var1);
+-		NBTTagList var2 = var1.func_753_l("Items");
++	public void readFromNBT(NBTTagCompound paramip) {
++		super.readFromNBT(paramip);
++		NBTTagList locallw = paramip.func_753_l("Items");
+ 		this.furnaceItemStacks = new ItemStack[this.getSizeInventory()];
+ 
+-		for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
+-			NBTTagCompound var4 = (NBTTagCompound)var2.tagAt(var3);
+-			byte var5 = var4.func_746_c("Slot");
+-			if(var5 >= 0 && var5 < this.furnaceItemStacks.length) {
+-				this.furnaceItemStacks[var5] = new ItemStack(var4);
++		for(int i = 0; i < locallw.tagCount(); ++i) {
++			NBTTagCompound localip = (NBTTagCompound)locallw.tagAt(i);
++			byte j = localip.func_746_c("Slot");
++			if(j >= 0 && j < this.furnaceItemStacks.length) {
++				this.furnaceItemStacks[j] = new ItemStack(localip);
+ 			}
+ 		}
+ 
+-		this.furnaceBurnTime = var1.func_745_d("BurnTime");
+-		this.furnaceCookTime = var1.func_745_d("CookTime");
++		this.furnaceBurnTime = paramip.func_745_d("BurnTime");
++		this.furnaceCookTime = paramip.func_745_d("CookTime");
+ 		this.currentItemBurnTime = this.getItemBurnTime(this.furnaceItemStacks[1]);
+ 	}
+ 
+-	public void writeToNBT(NBTTagCompound var1) {
+-		super.writeToNBT(var1);
+-		var1.func_749_a("BurnTime", (short)this.furnaceBurnTime);
+-		var1.func_749_a("CookTime", (short)this.furnaceCookTime);
+-		NBTTagList var2 = new NBTTagList();
++	public void writeToNBT(NBTTagCompound paramip) {
++		super.writeToNBT(paramip);
++		paramip.func_749_a("BurnTime", (short)this.furnaceBurnTime);
++		paramip.func_749_a("CookTime", (short)this.furnaceCookTime);
++		NBTTagList locallw = new NBTTagList();
+ 
+-		for(int var3 = 0; var3 < this.furnaceItemStacks.length; ++var3) {
+-			if(this.furnaceItemStacks[var3] != null) {
+-				NBTTagCompound var4 = new NBTTagCompound();
+-				var4.func_761_a("Slot", (byte)var3);
+-				this.furnaceItemStacks[var3].func_1086_a(var4);
+-				var2.setTag(var4);
++		for(int i = 0; i < this.furnaceItemStacks.length; ++i) {
++			if(this.furnaceItemStacks[i] != null) {
++				NBTTagCompound localip = new NBTTagCompound();
++				localip.func_761_a("Slot", (byte)i);
++				this.furnaceItemStacks[i].func_1086_a(localip);
++				locallw.setTag(localip);
+ 			}
+ 		}
+ 
+-		var1.func_762_a("Items", var2);
++		paramip.func_762_a("Items", locallw);
+ 	}
+ 
+ 	public int getInventoryStackLimit() {
+ 		return 64;
+ 	}
+ 
+-	public int getCookProgressScaled(int var1) {
+-		return this.furnaceCookTime * var1 / 200;
++	public int getCookProgressScaled(int paramInt) {
++		return this.furnaceCookTime * paramInt / 200;
+ 	}
+ 
+-	public int getBurnTimeRemainingScaled(int var1) {
++	public int getBurnTimeRemainingScaled(int paramInt) {
+ 		if(this.currentItemBurnTime == 0) {
+ 			this.currentItemBurnTime = 200;
+ 		}
+ 
+-		return this.furnaceBurnTime * var1 / this.currentItemBurnTime;
++		return this.furnaceBurnTime * paramInt / this.currentItemBurnTime;
+ 	}
+ 
+ 	public boolean isBurning() {
+@@ -103,8 +103,8 @@
+ 	}
+ 
+ 	public void updateEntity() {
+-		boolean var1 = this.furnaceBurnTime > 0;
+-		boolean var2 = false;
++		boolean i = this.furnaceBurnTime > 0;
++		boolean j = false;
+ 		if(this.furnaceBurnTime > 0) {
+ 			--this.furnaceBurnTime;
+ 		}
+@@ -113,9 +113,14 @@
+ 			if(this.furnaceBurnTime == 0 && this.canSmelt()) {
+ 				this.currentItemBurnTime = this.furnaceBurnTime = this.getItemBurnTime(this.furnaceItemStacks[1]);
+ 				if(this.furnaceBurnTime > 0) {
+-					var2 = true;
++					j = true;
+ 					if(this.furnaceItemStacks[1] != null) {
+-						--this.furnaceItemStacks[1].stackSize;
++						if(this.furnaceItemStacks[1].func_1091_a().shiftedIndex == Item.bucketLava.shiftedIndex) {
++							this.furnaceItemStacks[1] = new ItemStack(Item.bucketEmpty);
++						} else {
++							--this.furnaceItemStacks[1].stackSize;
++						}
++
+ 						if(this.furnaceItemStacks[1].stackSize == 0) {
+ 							this.furnaceItemStacks[1] = null;
+ 						}
+@@ -128,19 +133,19 @@
+ 				if(this.furnaceCookTime == 200) {
+ 					this.furnaceCookTime = 0;
+ 					this.smeltItem();
+-					var2 = true;
++					j = true;
+ 				}
+ 			} else {
+ 				this.furnaceCookTime = 0;
+ 			}
+ 
+-			if(var1 != this.furnaceBurnTime > 0) {
+-				var2 = true;
++			if(i != this.furnaceBurnTime > 0) {
++				j = true;
+ 				BlockFurnace.updateFurnaceBlockState(this.furnaceBurnTime > 0, this.worldObj, this.xCoord, this.yCoord, this.zCoord);
+ 			}
+ 		}
+ 
+-		if(var2) {
++		if(j) {
+ 			this.onInventoryChanged();
+ 		}
+ 
+@@ -150,17 +155,17 @@
+ 		if(this.furnaceItemStacks[0] == null) {
+ 			return false;
+ 		} else {
+-			int var1 = this.getSmeltingResultItem(this.furnaceItemStacks[0].func_1091_a().shiftedIndex);
+-			return var1 < 0 ? false : (this.furnaceItemStacks[2] == null ? true : (this.furnaceItemStacks[2].itemID != var1 ? false : (this.furnaceItemStacks[2].stackSize < this.getInventoryStackLimit() && this.furnaceItemStacks[2].stackSize < this.furnaceItemStacks[2].func_1089_c() ? true : this.furnaceItemStacks[2].stackSize < Item.itemsList[var1].getItemStackLimit())));
++			int i = this.getSmeltingResultItem(this.furnaceItemStacks[0].func_1091_a().shiftedIndex);
++			return i < 0 ? false : (this.furnaceItemStacks[1] != null && this.furnaceItemStacks[1].func_1091_a().shiftedIndex == Item.bucketLava.shiftedIndex && this.furnaceItemStacks[1].stackSize > 1 ? false : (this.furnaceItemStacks[2] == null ? true : (this.furnaceItemStacks[2].itemID != i ? false : (this.furnaceItemStacks[2].stackSize < this.getInventoryStackLimit() && this.furnaceItemStacks[2].stackSize < this.furnaceItemStacks[2].func_1089_c() ? true : this.furnaceItemStacks[2].stackSize < Item.itemsList[i].getItemStackLimit()))));
+ 		}
+ 	}
+ 
+ 	public void smeltItem() {
+ 		if(this.canSmelt()) {
+-			int var1 = this.getSmeltingResultItem(this.furnaceItemStacks[0].func_1091_a().shiftedIndex);
++			int i = this.getSmeltingResultItem(this.furnaceItemStacks[0].func_1091_a().shiftedIndex);
+ 			if(this.furnaceItemStacks[2] == null) {
+-				this.furnaceItemStacks[2] = new ItemStack(var1, 1);
+-			} else if(this.furnaceItemStacks[2].itemID == var1) {
++				this.furnaceItemStacks[2] = new ItemStack(i, 1);
++			} else if(this.furnaceItemStacks[2].itemID == i) {
+ 				++this.furnaceItemStacks[2].stackSize;
+ 			}
+ 
+@@ -172,16 +177,16 @@
+ 		}
+ 	}
+ 
+-	private int getSmeltingResultItem(int var1) {
+-		return var1 == Block.oreIron.blockID ? Item.ingotIron.shiftedIndex : (var1 == Block.oreGold.blockID ? Item.ingotGold.shiftedIndex : (var1 == Block.oreDiamond.blockID ? Item.diamond.shiftedIndex : (var1 == Block.sand.blockID ? Block.glass.blockID : (var1 == Item.porkRaw.shiftedIndex ? Item.porkCooked.shiftedIndex : (var1 == Item.fishRaw.shiftedIndex ? Item.fishCooked.shiftedIndex : (var1 == Block.cobblestone.blockID ? Block.stone.blockID : (var1 == Item.clay.shiftedIndex ? Item.brick.shiftedIndex : -1)))))));
++	private int getSmeltingResultItem(int paramInt) {
++		return paramInt == Block.oreIron.blockID ? Item.ingotIron.shiftedIndex : (paramInt == Block.oreGold.blockID ? Item.ingotGold.shiftedIndex : (paramInt == Block.oreDiamond.blockID ? Item.diamond.shiftedIndex : (paramInt == Block.sand.blockID ? Block.glass.blockID : (paramInt == Item.porkRaw.shiftedIndex ? Item.porkCooked.shiftedIndex : (paramInt == Item.fishRaw.shiftedIndex ? Item.fishCooked.shiftedIndex : (paramInt == Block.cobblestone.blockID ? Block.stone.blockID : (paramInt == Item.clay.shiftedIndex ? Item.brick.shiftedIndex : ModLoader.AddAllSmelting(paramInt))))))));
+ 	}
+ 
+-	private int getItemBurnTime(ItemStack var1) {
+-		if(var1 == null) {
++	private int getItemBurnTime(ItemStack paramfo) {
++		if(paramfo == null) {
+ 			return 0;
+ 		} else {
+-			int var2 = var1.func_1091_a().shiftedIndex;
+-			return var2 < 256 && Block.blocksList[var2].blockMaterial == Material.wood ? 300 : (var2 == Item.stick.shiftedIndex ? 100 : (var2 == Item.coal.shiftedIndex ? 1600 : (var2 == Item.bucketLava.shiftedIndex ? 20000 : 0)));
++			int i = paramfo.func_1091_a().shiftedIndex;
++			return i < 256 && Block.blocksList[i].blockMaterial == Material.wood ? 300 : (i == Item.stick.shiftedIndex ? 100 : (i == Item.coal.shiftedIndex ? 1600 : (i == Item.bucketLava.shiftedIndex ? 20000 : ModLoader.AddAllFuel(i))));
+ 		}
+ 	}
+ }
+Index: minecraft/net/minecraft/src/World.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/minecraft/net/minecraft/src/World.java b/minecraft/net/minecraft/src/World.java
+--- a/minecraft/net/minecraft/src/World.java	(revision 95fcfc183c0dca7f462b6336a8225cbeaa94709b)
++++ b/minecraft/net/minecraft/src/World.java	(revision b6e73487be70294bb8eaac6ce8e2f849a0faeba0)
+@@ -1528,10 +1528,10 @@
+ 		} else {
+ 			++this.field_4204_J;
+ 
+-			boolean var2;
+ 			try {
+ 				int var1 = 5000;
+ 
++				boolean var2;
+ 				while(this.field_1051_z.size() > 0) {
+ 					--var1;
+ 					if(var1 <= 0) {
+@@ -1543,11 +1543,10 @@
+ 				}
+ 
+ 				var2 = false;
++				return var2;
+ 			} finally {
+ 				--this.field_4204_J;
+ 			}
+-
+-			return var2;
+ 		}
+ 	}
+ 
